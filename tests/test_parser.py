@@ -1,5 +1,5 @@
 import unittest
-from parser import Parser
+import parser
 
 
 class ParserTestCases(unittest.TestCase):
@@ -18,6 +18,17 @@ class ParserTestCases(unittest.TestCase):
             1,
             msg=f'Test with {test_file}'
         )
+
+    def test_seek_header(self):
+        """
+        Tests functions ability to find the TP header
+        """
+        test_file = 'input_files\\example1.pcap'
+
+        p = parser.Parser(test_file)
+        p._seek_header()
+
+        self.assertEqual(p.bytes_read, 1902)
 
 
 if __name__ == '__main__':
