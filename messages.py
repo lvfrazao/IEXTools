@@ -55,12 +55,12 @@ def decode_message(msg_type, binary_msg):
         b'\x48': {
             'str': 'Trading Status Message',
             'cls': TradingStatus,
-            'fmt': '<Bq8s4s',
+            'fmt': '<1sq8s4s',
         },
         b'\x4f': {
             'str': 'Operational Halt Status Message',
             'cls': OperationalHalt,
-            'fmt': '<Bq8s',
+            'fmt': '<1sq8s',
         },
         b'\x50': {
             'str': 'Short Sale Price Test Status Message',
@@ -70,12 +70,12 @@ def decode_message(msg_type, binary_msg):
         b'\x51': {
             'str': 'Quote Update Message',
             'cls': QuoteUpdate,
-            'fmt': '<BqqLqqL',
+            'fmt': '<Bq8sLqqL',
         },
         b'\x54': {
             'str': 'Trade Report Message',
             'cls': TradeReport,
-            'fmt': '<BqqLqq',
+            'fmt': '<Bq8sLqq',
         },
         b'\x58': {
             'str': 'Official Price Message',
@@ -93,8 +93,8 @@ def decode_message(msg_type, binary_msg):
             'fmt': '<1sq8sLqqL1sBLqqqq',
         },
     }
-    DECODE_FMT = {msg: msg['fmt'] for msg in message_types}
-    MSG_CLS = {msg: msg['cls'] for msg in message_types}
+    DECODE_FMT = {msg[0]: message_types[msg]['fmt'] for msg in message_types}
+    MSG_CLS = {msg[0]: message_types[msg]['cls'] for msg in message_types}
 
     decoded_msg = struct.unpack(DECODE_FMT[msg_type], binary_msg)
     return MSG_CLS[msg_type](*decoded_msg)
@@ -113,10 +113,17 @@ class Message(object):
             self.timestamp / 10**9,
             tz=timezone.utc
         )
+        str_fields = 'symbol', 'status', 'reason', 'detail', 'halt_status'
+        for attrib in str_fields:
+            if hasattr(self, attrib):
+                setattr(
+                    self, attrib,
+                    getattr(self, attrib).decode('utf-8').strip()
+                )
 
 
 @dataclass
-class SystemEvent(object):
+class SystemEvent(Message):
     """
     From the TOPS specification document: "The System Event Message is used to
     indicate events that apply to the market or the data feed. There will be a
@@ -126,19 +133,14 @@ class SystemEvent(object):
     __slots__ = ('system_event', 'timestamp', 'date_time', 'system_event_str')
     system_event: int  # 1 byte
     timestamp: int  # 8 bytes
-    date_time: datetime = field(init=False)
-    system_event_str: str = field(init=False)
 
     def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
+        Message.__post_init__(self)
         self.system_event_str = system_event_types[self.system_event]
 
 
 @dataclass
-class SecurityDirective(object):
+class SecurityDirective(Message):
     """
     From the TOPS specification document: "IEX disseminates a full pre-market
     spin of Security Directory Messages for all IEX-listed securities. After
@@ -155,19 +157,14 @@ class SecurityDirective(object):
     round_lot_size: int  # 4 bytes
     adjusted_poc_close: int  # 8 bytes
     luld_tire: int  # 1 byte
-    price: float = field(init=False)
-    date_time: datetime = field(init=False)
 
     def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
+        Message.__post_init__(self)
         price = self.adjusted_poc_close / 10**4
 
 
 @dataclass
-class TradingStatus(object):
+class TradingStatus(Message):
     """
     From the TOPS specification document: "The Trading Status Message is used
     to indicate the current trading status of a security."
@@ -190,63 +187,45 @@ class TradingStatus(object):
         'status', 'timestamp', 'symbol', 'reason', 'date_time',
         'trading_status_message'
     )
-    status: int  # 1 byte
+    status: str  # 1 byte
     timestamp: int  # 8 bytes, nanosecond epoch time
     symbol: str  # 8 bytes
     reason: str  # 4 bytes
-    date_time: datetime = field(init=False)
 
     def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
+        Message.__post_init__(self)
         self.trading_status_message = trading_status_messages[self.status]
 
 
 @dataclass
-class OperationalHalt(object):
+class OperationalHalt(Message):
     """
     From the TOPS specification document: "The Exchange may suspend trading of
     one or more securities on IEX for operational reasons and indicates such
     operational halt using the Operational Halt Status Message."
     """
     __slots__ = ('halt_status', 'timestamp', 'symbol', 'date_time')
-    halt_status: int  # 1 byte
+    halt_status: str  # 1 byte
     timestamp: int  # 8 bytes
     symbol: str  # 8 bytes
-    date_time: datetime = field(init=False)
-
-    def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
 
 
 @dataclass
-class ShortSalePriceSale(object):
+class ShortSalePriceSale(Message):
     """
     From the TOPS specification document: "In association with Rule 201 of
     Regulation SHO, the Short Sale Price Test Message is used to indicate when
     a short sale price test restriction is in effect for a security."
     """
-    __slots__ = ('status', 'timestamp', 'symbol', 'detail', 'date_time')
-    status: int  # 1 byte
+    __slots__ = ('short_sale_status', 'timestamp', 'symbol', 'detail', 'date_time')
+    short_sale_status: int  # 1 byte
     timestamp: int  # 8 bytes
     symbol: str  # 8 bytes
     detail: str  # 1 byte
-    date_time: datetime = field(init=False)
-
-    def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
 
 
 @dataclass
-class QuoteUpdate(object):
+class QuoteUpdate(Message):
     """
     From the TOPS specification document: "TOPS broadcasts a real-time Quote
     Update Message each time IEX's best bid or offer quotation is updated
@@ -263,21 +242,15 @@ class QuoteUpdate(object):
     bid_price_int: int  # 8 bytes - Best quoted bid price
     ask_price_int: int  # 8 bytes - Best quoted ask price
     ask_size: int  # 4 bytes  - Aggregate quoted best ask size
-    bid_price: float = field(init=False)
-    ask_price: float = field(init=False)
-    date_time: datetime = field(init=False)
 
     def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
+        Message.__post_init__(self)
         self.bid_price = self.bid_price_int / 10**4
         self.ask_price = self.ask_price_int / 10**4
 
 
 @dataclass
-class TradeReport(object):
+class TradeReport(Message):
     """
     From the TOPS specification document: "Trade Report Messages are sent when
     an order on the IEX Order Book is executed in whole or in part. TOPS sends
@@ -293,19 +266,14 @@ class TradeReport(object):
     size: int  # 4 bytes - Trade volume
     price_int: int  # 8 bytes - Trade price
     trade_id: int  # 8 bytes - Trade ID, unique within the day
-    price: float = field(init=False)
-    date_time: datetime = field(init=False)
 
     def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
+        Message.__post_init__(self)
         self.price = self.price_int / 10**4
 
 
 @dataclass
-class OfficialPrice(object):
+class OfficialPrice(Message):
     """
     From the TOPS specification document: "Official Price Messages are sent for
     each IEX-listed security to indicate the IEX Official Opening Price and IEX
@@ -318,19 +286,14 @@ class OfficialPrice(object):
     timestamp: int  # 8 byte
     symbol: str  # 8 bytes
     price_int: int  # 8 bytes
-    price: float = field(init=False)
-    date_time: datetime = field(init=False)
 
     def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
+        Message.__post_init__(self)
         self.price = self.price_int / 10**4
 
 
 @dataclass
-class TradeBreak(object):
+class TradeBreak(Message):
     """
     From the TOPS specification document: "Trade Break Messages are sent when
     an execution on IEX is broken on that same trading day. Trade breaks are
@@ -344,14 +307,9 @@ class TradeBreak(object):
     symbol: str  # 8 bytes
     price_int: int  # 8 bytes
     trade_id: int  # 8 bytes
-    price: float = field(init=False)
-    date_time: datetime = field(init=False)
 
     def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
+        Message.__post_init__(self)
         self.price = self.price_int / 10**4
 
 
@@ -393,19 +351,8 @@ class AuctionInformation(object):
     lower_auction_collar_price_int: int  # 8 bytes
     upper_auction_collar_price_int: int  # 8 bytes
 
-    reference_price: float = field(init=False)
-    indicative_clearing_price: float = field(init=False)
-    auction_book_clearing_price: float = field(init=False)
-    collar_reference_price: float = field(init=False)
-    lower_auction_collar_price: float = field(init=False)
-    upper_auction_collar_price: float = field(init=False)
-    date_time: datetime = field(init=False)
-
     def __post_init__(self):
-        self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
-        )
+        Message.__post_init__(self)
         self.reference_price = (
             self.reference_price_int / 10**4
         )
