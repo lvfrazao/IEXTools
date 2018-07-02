@@ -11,11 +11,7 @@ $ historical_data = Parser('c:\\example.pcap')
 """
 import struct
 from datetime import datetime, timezone
-
-
-fmt = {
-    'short_int': 'h'
-}
+import messages
 
 
 class Parser(object):
@@ -115,15 +111,19 @@ class Parser(object):
         )
 
     def get_next_message(self):
-        if self.messages_left:
-            # Read next message
-            message_len = struct.unpack('<h', self.read_chunk(2))[0]
-            message = self.read_chunk(message_len)
-            message_type = message[0]
-        else:
-            # If no messages left from current packet find the next TP header
+        while not self.messages_left:
             self._seek_header()
-            return self.get_next_message()
+
+        # Read next message
+        message_len = struct.unpack('<h', self.read_chunk(2))[0]
+        _ = self.read_chunk(message_len)
+        self.message_type = _[0]
+        self.message_binary = _[1:]
+        self.message = messages.decode_message(
+            self.message_type, self.message_binary
+        )
+        self.messages_left -= 1
+        return self.message
 
     def _get_payload_length(file_path):
         pass
@@ -132,5 +132,13 @@ class Parser(object):
 if __name__ == '__main__':
     file_path = r'C:\Users\luiz_\Dropbox\Personal\Python\Programs\IEX_hist_parser\IEX TOPS Sample\20180103_IEXTP1_TOPS1.6.pcap'
     p = Parser(file_path)
-    p._seek_header()
-    print(p.bytes_read)
+    try:
+        for i in range(1000000):
+            if i < 15000:
+                p.get_next_message()
+            else:
+                print(p.get_next_message(), p.message.date_time)
+                print(p.message_binary.hex())
+    except Exception as e:
+        print(p.message_type)
+        raise
