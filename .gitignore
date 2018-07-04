@@ -1,3 +1,7 @@
+# Folder containing large examples of IEX pcap files
+IEX TOPS Sample/
+
+# Boilerplate:
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
