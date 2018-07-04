@@ -1,5 +1,7 @@
 # IEX_hist_parser
 
+v 0.0.1
+
 This package provides tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: https://iextrading.com/trading/market-data/
 
 ## Disclaimer
@@ -51,13 +53,13 @@ b'@"\xca=uON\x06\x15ZVZZT\xcf\x03\x00\x006\x87\x01\x00\x00\x00\x00\x00\xdb\xce\x
 
 Benchmarks:
 On my personal laptop (Lenovo ThinkPad X1 Carbon, Windows 10):
-'''
+```
 Beginning test - 1,000,000 messages - all messages, not printing
 Parsed 1,000,000 messages in 52.2 seconds -- 19141.6 messages per second
 
 Beginning test - 1,000,000 messages - only TradeReport and QuoteUpdate messages, not printing
 Parsed 1,000,000 messages in 54.0 seconds -- 18512.9 messages per second
-'''
+```
 
 By not specifying the `allowed` argument the parser returns 1,000,000 parsed messages approximately 3% faster. However, in order to return 1,000,000 parsed messages the Parser with the `allowed` argument set may have to read through more than 1,000,000 messages. Testing suggests that actually decoding the message takes about 10 microseconds (130,000 messages per second).
 

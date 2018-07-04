@@ -18,6 +18,9 @@ Build a small DB with the IEX historical data to perform backtesting of trading 
 10. Analyze the universe of stocks available through IEX
 11. Analyze how many messages per second are sent vs. how fast I can process through them -- Will I be able to do this in real time?
 12. How can I backtest strategies using this dataset?
+13. What other functionality do I need to add?
+14. Proper packaging and hosting on PyPi
+15. Pick a new cooler name for this project
 
 ## Questions
 
