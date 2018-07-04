@@ -1,5 +1,5 @@
 """
-IEX_parser.py
+IEXparser.py
 
 Purpose:
 This module contains the 'Parser' class which scans the IEX pcap file,
@@ -7,7 +7,32 @@ identifies messages and decodes them using the struct module.
 
 Usage:
 To create a Parser object simply supply the file path as an argument
-$ historical_data = Parser('c:\\example.pcap')
+
+> iex_parser = Parser('c:\\example.pcap')
+
+This instantiates a Parser object with the pcap file opened. You can also
+optionally specify what type of HIST file you are loading, either TOPS
+(`tops=True`) or DEEP (`deep=True`).
+
+Use the `get_next_message` method of the Parser object to return a message
+object. The message objects are documented in the messages.py module.
+
+> new_message = iex_parser.get_next_message()
+
+The last message retrieved can also be accessed through the Parser object
+itself with the `message` attribute. Similarly the message type can be accessed
+as `Parser.message_type` and the binary encoded message can be accessed with
+`Parser.message_binary`.
+
+Benchmarks:
+'''
+Beginning test - 1,000,000 messages - all messages, not printing
+Parsed 1,000,000 messages in 52.2 seconds -- 19141.6 messages per second
+------------------------------------------------------------------------
+Beginning test - 1,000,000 messages - only TradeReport and QuoteUpdate
+messages, not printing
+Parsed 1,000,000 messages in 54.0 seconds -- 18512.9 messages per second
+'''
 """
 import struct
 from datetime import datetime, timezone
@@ -15,7 +40,16 @@ import messages
 
 
 class Parser(object):
+    """
+    Creates the Parser object. Simply pass the filepath of the pcap file when
+    initializing the object. 
+
+    Parser(filepath)
+    """
     def __init__(self, file_path, tops=True, deep=False):
+        self.file_path = file_path
+        self.tops = tops
+        self.deep = deep
         self.file = self._load(file_path)
         # IEX TP Header Structure
         self.version = b'\x01'
@@ -38,6 +72,22 @@ class Parser(object):
             )
         self.messages_left = 0
         self.bytes_read = 0
+
+        self.messages_types = {
+            messages.ShortSalePriceSale: b'P',
+            messages.TradeBreak: b'B',
+            messages.AuctionInformation: b'A',
+            messages.TradeReport: b'T',
+            messages.OfficialPrice: b'X',
+            messages.SystemEvent: b'S',
+            messages.SecurityDirective: b'D',
+            messages.TradingStatus: b'H',
+            messages.OperationalHalt: b'O',
+            messages.QuoteUpdate: b'Q',
+        }
+
+    def __repr__(self):
+        return f'Parser("{self.file_path}", tops={self.tops}, deep={self.deep})'
 
     def _load(self, file_path):
         """
@@ -73,7 +123,10 @@ class Parser(object):
         """
         line = self.file.readline()
         self.bytes_read += len(line)
-        return line
+        if line:
+            return line
+        else:
+            raise EOFError('Reached end of PCAP file')
 
     def read_chunk(self, chunk=1024):
         """
@@ -81,7 +134,11 @@ class Parser(object):
         returns that chunk to the caller
         """
         self.bytes_read += chunk
-        return self.file.read(chunk)
+        data = self.file.read(chunk)
+        if data:
+            return data
+        else:
+            raise EOFError('Reached end of PCAP file')
 
     def _seek_header(self):
         """
@@ -110,35 +167,42 @@ class Parser(object):
             tz=timezone.utc
         )
 
-    def get_next_message(self):
+    def get_next_message(self, allowed=None):
+        """
+        Returns the next message in the pcap file. The user may optionally
+        provide an 'allowed' argument to specify which type of messages they
+        would like to retrieve. Please note that limiting the returned messages
+        probably does not improve performance by that much, in fact tests have
+        shown reduced rate of messages returned when allowed messages are
+        specified (note the rate of messages returned is lower, but not the
+        rate of messages analyzed).
+        """
+        if not isinstance(allowed, (list, tuple)) and allowed is not None:
+            raise ValueError('allowed must be either a list or tuple')
+        if allowed:
+            allowed = [self.messages_types[a][0] for a in allowed]
+
         while not self.messages_left:
             self._seek_header()
 
-        # Read next message
-        message_len = struct.unpack('<h', self.read_chunk(2))[0]
-        _ = self.read_chunk(message_len)
-        self.message_type = _[0]
-        self.message_binary = _[1:]
+        self._read_next_message()
+        while allowed is not None and self.message_type not in allowed:
+            while not self.messages_left:
+                self._seek_header()
+
+            self._read_next_message()
+
         self.message = messages.decode_message(
             self.message_type, self.message_binary
         )
-        self.messages_left -= 1
         return self.message
 
-    def _get_payload_length(file_path):
-        pass
-
-
-if __name__ == '__main__':
-    file_path = r'C:\Users\luiz_\Dropbox\Personal\Python\Programs\IEX_hist_parser\IEX TOPS Sample\20180103_IEXTP1_TOPS1.6.pcap'
-    p = Parser(file_path)
-    try:
-        for i in range(1000000):
-            if i < 15000:
-                p.get_next_message()
-            else:
-                print(p.get_next_message(), p.message.date_time)
-                print(p.message_binary.hex())
-    except Exception as e:
-        print(p.message_type)
-        raise
+    def _read_next_message(self):
+        """
+        Read next message from file
+        """
+        message_len = struct.unpack('<h', self.read_chunk(2))[0]
+        cur_msg = self.read_chunk(message_len)
+        self.messages_left -= 1
+        self.message_type = cur_msg[0]
+        self.message_binary = cur_msg[1:]

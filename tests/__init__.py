@@ -1,1 +1,1 @@
-from IEX_hist_parser import parser
+from IEX_hist_parser import IEXparser
