@@ -121,6 +121,12 @@ class Message(object):
                     getattr(self, attrib).decode('utf-8').strip()
                 )
 
+        int_prices = [p for p in self.__slots__ if 'price' in p and 'int' in p]
+
+        for int_price in int_prices:
+            attrib = int_price.split('_int')[0]
+            setattr(self, attrib, getattr(self, int_price) / 10**4)
+
 
 @dataclass
 class SystemEvent(Message):
@@ -157,10 +163,6 @@ class SecurityDirective(Message):
     round_lot_size: int  # 4 bytes
     adjusted_poc_close: int  # 8 bytes
     luld_tire: int  # 1 byte
-
-    def __post_init__(self):
-        Message.__post_init__(self)
-        price = self.adjusted_poc_close / 10**4
 
 
 @dataclass
@@ -243,11 +245,6 @@ class QuoteUpdate(Message):
     ask_price_int: int  # 8 bytes - Best quoted ask price
     ask_size: int  # 4 bytes  - Aggregate quoted best ask size
 
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.bid_price = self.bid_price_int / 10**4
-        self.ask_price = self.ask_price_int / 10**4
-
 
 @dataclass
 class TradeReport(Message):
@@ -267,10 +264,6 @@ class TradeReport(Message):
     price_int: int  # 8 bytes - Trade price
     trade_id: int  # 8 bytes - Trade ID, unique within the day
 
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.price = self.price_int / 10**4
-
 
 @dataclass
 class OfficialPrice(Message):
@@ -286,10 +279,6 @@ class OfficialPrice(Message):
     timestamp: int  # 8 byte
     symbol: str  # 8 bytes
     price_int: int  # 8 bytes
-
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.price = self.price_int / 10**4
 
 
 @dataclass
@@ -308,13 +297,9 @@ class TradeBreak(Message):
     price_int: int  # 8 bytes
     trade_id: int  # 8 bytes
 
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.price = self.price_int / 10**4
-
 
 @dataclass
-class AuctionInformation(object):
+class AuctionInformation(Message):
     """
     From the TOPS specification document: "TOPS broadcasts an Auction
     Information Message every one second between the Lock-in Time and the
@@ -350,24 +335,3 @@ class AuctionInformation(object):
     collar_reference_price_int: int  # 8 bytes
     lower_auction_collar_price_int: int  # 8 bytes
     upper_auction_collar_price_int: int  # 8 bytes
-
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.reference_price = (
-            self.reference_price_int / 10**4
-        )
-        self.indicative_clearing_price = (
-            self.indicative_clearing_price_int / 10**4
-        )
-        self.auction_book_clearing_price = (
-            self.auction_book_clearing_price_int / 10**4
-        )
-        self.collar_reference_price = (
-            self.collar_reference_price_int / 10**4
-        )
-        self.lower_auction_collar_price = (
-            self.lower_auction_collar_price_int / 10**4
-        )
-        self.upper_auction_collar_price = (
-            self.upper_auction_collar_price_int / 10**4
-        )
