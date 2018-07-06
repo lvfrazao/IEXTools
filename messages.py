@@ -136,7 +136,7 @@ class SystemEvent(Message):
     single message disseminated per channel for each System Event type within a
     given trading session."
     """
-    __slots__ = ('system_event', 'timestamp', 'date_time', 'system_event_str')
+    __slots__ = ('system_event', 'timestamp', 'system_event_str')
     system_event: int  # 1 byte
     timestamp: int  # 8 bytes
 
@@ -186,7 +186,7 @@ class TradingStatus(Message):
         o MCB2: Market-Wide Circuit Breaker Level 2 Breached
     """
     __slots__ = (
-        'status', 'timestamp', 'symbol', 'reason', 'date_time',
+        'status', 'timestamp', 'symbol', 'reason',
         'trading_status_message'
     )
     status: str  # 1 byte
@@ -206,7 +206,7 @@ class OperationalHalt(Message):
     one or more securities on IEX for operational reasons and indicates such
     operational halt using the Operational Halt Status Message."
     """
-    __slots__ = ('halt_status', 'timestamp', 'symbol', 'date_time')
+    __slots__ = ('halt_status', 'timestamp', 'symbol')
     halt_status: str  # 1 byte
     timestamp: int  # 8 bytes
     symbol: str  # 8 bytes
@@ -219,7 +219,7 @@ class ShortSalePriceSale(Message):
     Regulation SHO, the Short Sale Price Test Message is used to indicate when
     a short sale price test restriction is in effect for a security."
     """
-    __slots__ = ('short_sale_status', 'timestamp', 'symbol', 'detail', 'date_time')
+    __slots__ = ('short_sale_status', 'timestamp', 'symbol', 'detail')
     short_sale_status: int  # 1 byte
     timestamp: int  # 8 bytes
     symbol: str  # 8 bytes
@@ -235,7 +235,7 @@ class QuoteUpdate(Message):
     """
     __slots__ = (
         'flags', 'timestamp', 'symbol', 'bid_size', 'bid_price_int',
-        'ask_price_int', 'ask_size', 'bid_price', 'ask_price', 'date_time'
+        'ask_price_int', 'ask_size', 'bid_price', 'ask_price'
     )
     flags: int  # 1 byte
     timestamp: int  # 8 bytes
@@ -255,7 +255,7 @@ class TradeReport(Message):
     """
     __slots__ = (
         'flags', 'timestamp', 'symbol', 'size', 'price_int', 'trade_id',
-        'date_time', 'price'
+        'price'
     )
     flags: int  # 1 byte
     timestamp: int  # 8 bytes
@@ -273,7 +273,7 @@ class OfficialPrice(Message):
     Official Closing Price."
     """
     __slots__ = (
-        'price_type', 'timestamp', 'symbol', 'price_int', 'date_time', 'price'
+        'price_type', 'timestamp', 'symbol', 'price_int', 'price'
     )
     price_type: str  # 1 byte
     timestamp: int  # 8 byte
@@ -289,7 +289,7 @@ class TradeBreak(Message):
     rare and only affect applications that rely upon IEX execution based data."
     """
     __slots__ = (
-        'price_type', 'timestamp', 'symbol', 'price_int', 'date_time', 'price'
+        'price_type', 'timestamp', 'symbol', 'price_int', 'price'
     )
     price_type: str  # 1 byte
     timestamp: int  # 8 byte
@@ -316,7 +316,7 @@ class AuctionInformation(Message):
         'upper_auction_collar_price_int', 'reference_price',
         'indicative_clearing_price', 'auction_book_clearing_price',
         'collar_reference_price', 'lower_auction_collar_price',
-        'upper_auction_collar_price', 'date_time'
+        'upper_auction_collar_price'
     )
     auction_type: str  # 1 byte
     timestamp: int  # 8 byte
