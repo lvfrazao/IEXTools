@@ -42,7 +42,7 @@ import messages
 class Parser(object):
     """
     Creates the Parser object. Simply pass the filepath of the pcap file when
-    initializing the object. 
+    initializing the object.
 
     Parser(filepath)
     """
@@ -74,16 +74,16 @@ class Parser(object):
         self.bytes_read = 0
 
         self.messages_types = {
-            messages.ShortSalePriceSale: b'P',
-            messages.TradeBreak: b'B',
-            messages.AuctionInformation: b'A',
-            messages.TradeReport: b'T',
-            messages.OfficialPrice: b'X',
-            messages.SystemEvent: b'S',
-            messages.SecurityDirective: b'D',
-            messages.TradingStatus: b'H',
-            messages.OperationalHalt: b'O',
-            messages.QuoteUpdate: b'Q',
+            messages.ShortSalePriceSale: b'\x50',
+            messages.TradeBreak: b'\x42',
+            messages.AuctionInformation: b'\x41',
+            messages.TradeReport: b'\x54',
+            messages.OfficialPrice: b'\x58',
+            messages.SystemEvent: b'\x53',
+            messages.SecurityDirective: b'\x44',
+            messages.TradingStatus: b'\x48',
+            messages.OperationalHalt: b'\x4f',
+            messages.QuoteUpdate: b'\x51',
         }
 
     def __repr__(self):
@@ -126,7 +126,7 @@ class Parser(object):
         if line:
             return line
         else:
-            raise EOFError('Reached end of PCAP file')
+            raise StopIteration('Reached end of PCAP file')
 
     def read_chunk(self, chunk=1024):
         """
@@ -138,7 +138,7 @@ class Parser(object):
         if data:
             return data
         else:
-            raise EOFError('Reached end of PCAP file')
+            raise StopIteration('Reached end of PCAP file')
 
     def _seek_header(self):
         """
@@ -157,7 +157,8 @@ class Parser(object):
                     found = True
             else:
                 i = 0
-        remaining_header = struct.unpack('<hhqqq', self.read_chunk(28))
+        header_fmt = '<hhqqq'
+        remaining_header = struct.unpack(header_fmt, self.read_chunk(28))
         self.cur_msg_payload_len = remaining_header[0]
         self.messages_left = remaining_header[1]
         self.cur_stream_offset = remaining_header[2]
@@ -199,10 +200,13 @@ class Parser(object):
 
     def _read_next_message(self):
         """
-        Read next message from file
+        Read next message from file.
+        Note: using seek() to move past messages that we dont want to read
+        doesn't seem to help performance. My theory is that using mmap should
+        not help much either given that were typically reading the files from
+        beginning to end sequentially.
         """
         message_len = struct.unpack('<h', self.read_chunk(2))[0]
-        cur_msg = self.read_chunk(message_len)
         self.messages_left -= 1
-        self.message_type = cur_msg[0]
-        self.message_binary = cur_msg[1:]
+        self.message_type = self.read_chunk(1)[0]
+        self.message_binary = self.read_chunk(message_len - 1)
