@@ -89,6 +89,20 @@ class Parser(object):
     def __repr__(self):
         return f'Parser("{self.file_path}", tops={self.tops}, deep={self.deep})'
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        """
+        Meant to allow the user to use the Parser object in a loop to read
+        through all messages in a pcap file similar to reading all lines in a
+        file.
+
+        for message in Parser(file_path):
+            do_something(message)
+        """
+        return self.get_next_message()
+
     def _load(self, file_path):
         """
         Function to load a TOPS File into the parser. Simply returns a file
@@ -133,8 +147,8 @@ class Parser(object):
         Reads a single chunk of arbitrary size from the open file object and
         returns that chunk to the caller
         """
-        self.bytes_read += chunk
         data = self.file.read(chunk)
+        self.bytes_read += len(data)
         if data:
             return data
         else:
