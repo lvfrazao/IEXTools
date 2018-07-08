@@ -5,7 +5,7 @@ decode messages. All information for parsing messages is derived from the
 specifications published by IEX on their website as "IEX TOPS Specification":
 https://iextrading.com/docs/IEX%20TOPS%20Specification.pdf
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import struct
 

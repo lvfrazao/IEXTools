@@ -1,5 +1,5 @@
 import unittest
-import IEXparser
+from .. import IEXparser
 
 
 class ParserTestCases(unittest.TestCase):
