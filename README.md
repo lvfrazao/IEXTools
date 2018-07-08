@@ -51,6 +51,14 @@ datetime.datetime(2018, 1, 3, 13, 0, 27, 833117, tzinfo=datetime.timezone.utc)
 b'@"\xca=uON\x06\x15ZVZZT\xcf\x03\x00\x006\x87\x01\x00\x00\x00\x00\x00\xdb\xce\x08\x00\x00\x00\x00\x00'
 ```
 
+The program also allows you to use it with a context manager and loop through it like a file:
+
+```Python
+with Parser(file_path) as iex_messages:
+    for message in iex_messages:
+        do_something(message)
+```
+
 Benchmarks:
 On my personal laptop (Lenovo ThinkPad X1 Carbon, Windows 10):
 ```

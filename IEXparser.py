@@ -103,6 +103,12 @@ class Parser(object):
         """
         return self.get_next_message()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.file.close()
+
     def _load(self, file_path):
         """
         Function to load a TOPS File into the parser. Simply returns a file
