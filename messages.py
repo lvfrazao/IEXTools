@@ -116,10 +116,11 @@ class Message(object):
         str_fields = 'symbol', 'status', 'reason', 'detail', 'halt_status'
         for attrib in str_fields:
             if hasattr(self, attrib):
-                setattr(
-                    self, attrib,
-                    getattr(self, attrib).decode('utf-8').strip()
-                )
+                if isinstance(getattr(self, attrib), str):
+                    setattr(
+                        self, attrib,
+                        getattr(self, attrib).decode('utf-8').strip()
+                    )
 
         int_prices = [p for p in self.__slots__ if 'price' in p and 'int' in p]
 
