@@ -1,0 +1,28 @@
+Processed 0 messages - cur datetime = 2018-01-03 12:37:04.176476+00:00
+Processed 1,000,000 messages - cur datetime = 2018-01-03 14:41:03.274477+00:00
+Processed 2,000,000 messages - cur datetime = 2018-01-03 14:54:45.937473+00:00
+Processed 3,000,000 messages - cur datetime = 2018-01-03 15:09:48.468247+00:00
+Processed 4,000,000 messages - cur datetime = 2018-01-03 15:27:40.906042+00:00
+Processed 5,000,000 messages - cur datetime = 2018-01-03 15:46:36.591943+00:00
+Processed 6,000,000 messages - cur datetime = 2018-01-03 16:07:44.864722+00:00
+Processed 7,000,000 messages - cur datetime = 2018-01-03 16:32:22.010882+00:00
+Processed 8,000,000 messages - cur datetime = 2018-01-03 17:01:45.031742+00:00
+Processed 9,000,000 messages - cur datetime = 2018-01-03 17:34:28.120653+00:00
+Processed 10,000,000 messages - cur datetime = 2018-01-03 18:06:41.083774+00:00
+Processed 11,000,000 messages - cur datetime = 2018-01-03 18:41:51.031339+00:00
+Processed 12,000,000 messages - cur datetime = 2018-01-03 19:09:44.516801+00:00
+Processed 13,000,000 messages - cur datetime = 2018-01-03 19:35:30.761707+00:00
+Processed 14,000,000 messages - cur datetime = 2018-01-03 20:04:51.972670+00:00
+Processed 15,000,000 messages - cur datetime = 2018-01-03 20:34:00.926559+00:00
+Processed 16,000,000 messages - cur datetime = 2018-01-03 20:51:20.440086+00:00
+Processed 17,000,000 messages - cur datetime = 2018-01-03 20:59:56.744981+00:00
+Parsed 17,059,707 messages in 1,002 s-- 17,021 msgs per second -- 2.59 mb/s
+Min Datetime = 2018-01-03 12:37:04.176476+00:00, Max Datetime = 2018-01-03 22:10:00.000672+00:00 -- 496 msgs/s
+|SystemEvent..............|...................6| 0.0%|
+|ShortSalePriceSale.......|................8622| 0.1%|
+|OperationalHalt..........|................8509| 0.0%|
+|TradingStatus............|................8526| 0.0%|
+|QuoteUpdate..............|............16027242|93.9%|
+|SecurityDirective........|...................3| 0.0%|
+|TradeReport..............|.............1004648| 5.9%|
+|AuctionInformation.......|................2151| 0.0%|
