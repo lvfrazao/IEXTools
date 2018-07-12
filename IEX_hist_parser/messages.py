@@ -116,7 +116,7 @@ class Message(object):
         str_fields = 'symbol', 'status', 'reason', 'detail', 'halt_status'
         for attrib in str_fields:
             if hasattr(self, attrib):
-                if isinstance(getattr(self, attrib), str):
+                if isinstance(getattr(self, attrib), bytes):
                     setattr(
                         self, attrib,
                         getattr(self, attrib).decode('utf-8').strip()

@@ -1,5 +1,5 @@
 import unittest
-from .. import IEXparser
+from . import IEXparser
 
 
 class ParserTestCases(unittest.TestCase):
@@ -9,9 +9,10 @@ class ParserTestCases(unittest.TestCase):
     def test_file_load(self):
         """
         Tests the functionality of the records file reader for normal
-        functionality (file as expected)
+        functionality (loads a file and doesn't raise an exception)
         """
         test_file = 'input_files\\example1.pcap'
+        p = IEXparser.Parser(test_file)
 
         self.assertEqual(
             1,
@@ -28,7 +29,13 @@ class ParserTestCases(unittest.TestCase):
         p = IEXparser.Parser(test_file)
         p._seek_header()
 
-        self.assertEqual(p.bytes_read, 1902)
+        self.assertEqual(p.bytes_read, 1930)
+    
+    def test_end_to_end(self):
+        test_file = 'input_files\\example1.pcap'
+        with IEXparser.Parser(test_file) as p:
+            for message in p:
+                pass
 
 
 if __name__ == '__main__':

@@ -36,7 +36,7 @@ Parsed 1,000,000 messages in 54.0 seconds -- 18512.9 messages per second
 """
 import struct
 from datetime import datetime, timezone
-import messages
+from . import messages
 
 
 class Parser(object):
