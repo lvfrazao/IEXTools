@@ -86,6 +86,8 @@ class Parser(object):
             messages.QuoteUpdate: b'\x51',
         }
 
+        self.decoder = messages.MessageDecoder()
+
     def __repr__(self):
         return f'Parser("{self.file_path}", tops={self.tops}, deep={self.deep})'
 
@@ -213,7 +215,7 @@ class Parser(object):
 
             self._read_next_message()
 
-        self.message = messages.decode_message(
+        self.message = self.decoder.decode_message(
             self.message_type, self.message_binary
         )
         return self.message

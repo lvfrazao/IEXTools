@@ -32,72 +32,80 @@ trading_status_messages = {
 }
 
 
-def decode_message(msg_type, binary_msg):
-    """
-    Some notes on data types used in decoding IEX messages:
-    B: unsigned byte
-    H: short unsigned int (2 bytes)
-    L: long unsigned int (4 bytes)
-    s: string (size denoted by preceding number)
-    q: signed long long (8 bytes)
-    """
-    message_types = {
-        b'\x53': {
-            'str': 'System Event Message',
-            'cls': SystemEvent,
-            'fmt': '<Bq',
-        },
-        b'\x44': {
-            'str': 'Security Directory Message',
-            'cls': SecurityDirective,
-            'fmt': '<Bq8sLqB',
-        },
-        b'\x48': {
-            'str': 'Trading Status Message',
-            'cls': TradingStatus,
-            'fmt': '<1sq8s4s',
-        },
-        b'\x4f': {
-            'str': 'Operational Halt Status Message',
-            'cls': OperationalHalt,
-            'fmt': '<1sq8s',
-        },
-        b'\x50': {
-            'str': 'Short Sale Price Test Status Message',
-            'cls': ShortSalePriceSale,
-            'fmt': '<Bq8s1s',
-        },
-        b'\x51': {
-            'str': 'Quote Update Message',
-            'cls': QuoteUpdate,
-            'fmt': '<Bq8sLqqL',
-        },
-        b'\x54': {
-            'str': 'Trade Report Message',
-            'cls': TradeReport,
-            'fmt': '<Bq8sLqq',
-        },
-        b'\x58': {
-            'str': 'Official Price Message',
-            'cls': OfficialPrice,
-            'fmt': '<1sq8sq',
-        },
-        b'\x42': {
-            'str': 'Trade Break Message',
-            'cls': TradeBreak,
-            'fmt': '<1sq8sqq',
-        },
-        b'\x41': {
-            'str': 'Auction Information Message',
-            'cls': AuctionInformation,
-            'fmt': '<1sq8sLqqL1sBLqqqq',
-        },
-    }
-    DECODE_FMT = {msg[0]: message_types[msg]['fmt'] for msg in message_types}
-    MSG_CLS = {msg[0]: message_types[msg]['cls'] for msg in message_types}
+class MessageDecoder(object):
+    def __init__(self):
+        """
+        Some notes on data types used in decoding IEX messages:
+        B: unsigned byte
+        H: short unsigned int (2 bytes)
+        L: long unsigned int (4 bytes)
+        s: string (size denoted by preceding number)
+        q: signed long long (8 bytes)
+        """
+        self.message_types = {
+            b'\x53': {
+                'str': 'System Event Message',
+                'cls': SystemEvent,
+                'fmt': '<Bq',
+            },
+            b'\x44': {
+                'str': 'Security Directory Message',
+                'cls': SecurityDirective,
+                'fmt': '<Bq8sLqB',
+            },
+            b'\x48': {
+                'str': 'Trading Status Message',
+                'cls': TradingStatus,
+                'fmt': '<1sq8s4s',
+            },
+            b'\x4f': {
+                'str': 'Operational Halt Status Message',
+                'cls': OperationalHalt,
+                'fmt': '<1sq8s',
+            },
+            b'\x50': {
+                'str': 'Short Sale Price Test Status Message',
+                'cls': ShortSalePriceSale,
+                'fmt': '<Bq8s1s',
+            },
+            b'\x51': {
+                'str': 'Quote Update Message',
+                'cls': QuoteUpdate,
+                'fmt': '<Bq8sLqqL',
+            },
+            b'\x54': {
+                'str': 'Trade Report Message',
+                'cls': TradeReport,
+                'fmt': '<Bq8sLqq',
+            },
+            b'\x58': {
+                'str': 'Official Price Message',
+                'cls': OfficialPrice,
+                'fmt': '<1sq8sq',
+            },
+            b'\x42': {
+                'str': 'Trade Break Message',
+                'cls': TradeBreak,
+                'fmt': '<1sq8sqq',
+            },
+            b'\x41': {
+                'str': 'Auction Information Message',
+                'cls': AuctionInformation,
+                'fmt': '<1sq8sLqqL1sBLqqqq',
+            },
+        }
+        self.DECODE_FMT = {
+            msg[0]: self.message_types[msg]['fmt'] for msg in self.message_types
+        }
+        self.MSG_CLS = {
+            msg[0]: self.message_types[msg]['cls'] for msg in self.message_types
+        }
 
-    decoded_msg = struct.unpack(DECODE_FMT[msg_type], binary_msg)
-    return MSG_CLS[msg_type](*decoded_msg)
+    def decode_message(self, msg_type, binary_msg):
+        fmt = self.DECODE_FMT[msg_type]
+        decoded_msg = struct.unpack(fmt, binary_msg)
+        msg = self.MSG_CLS[msg_type](*decoded_msg)
+        return msg
 
 
 @dataclass
