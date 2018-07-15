@@ -1,6 +1,6 @@
 # IEX_hist_parser
 
-v 0.0.1
+v 0.0.2
 
 This package provides tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: https://iextrading.com/trading/market-data/
 
