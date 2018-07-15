@@ -7,4 +7,16 @@ class IEXHISTException(Exception):
 
 
 class RequestsException(IEXHISTException):
+    """
+    Exception wrapper for requests exceptions
+    """
+
+    pass
+
+
+class ProtocolException(IEXHISTException):
+    """
+    Unexpected format while reading or manipulating IEX DEEP or TOPS data
+    """
+
     pass

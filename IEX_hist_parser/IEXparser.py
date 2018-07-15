@@ -34,6 +34,7 @@ messages, not printing
 Parsed 1,000,000 messages in 54.0 seconds -- 18512.9 messages per second
 '''
 """
+from __future__ import annotations
 import struct
 from datetime import datetime, timezone
 from . import messages
@@ -45,7 +46,8 @@ class Parser(object):
     Creates the Parser object. Simply pass the filepath of the pcap file when
     initializing the object.
 
-    Parser(filepath)
+    Usage:
+    p = Parser(filepath)
     """
 
     def __init__(
@@ -104,6 +106,7 @@ class Parser(object):
         through all messages in a pcap file similar to reading all lines in a
         file.
 
+        Usage:
         for message in Parser(file_path):
             do_something(message)
         """
@@ -122,10 +125,18 @@ class Parser(object):
         """
         return open(file_path, "rb")
 
-    def _get_session_id(self, file_path: str) -> None:
+    def _get_session_id(self, file_path: str) -> bytes:
         """
         The session ID is unique every day. Simply denotes the day. We use this
         to build the IEX Transport Protocol header.
+
+        inputs:
+
+            file_path   : path to pcap file to be decoded
+        
+        Returns:
+
+            session_id  : binary encoded session ID
         """
         try:
             return self.session_id
@@ -145,7 +156,16 @@ class Parser(object):
     def read_next_line(self) -> bytes:
         """
         Reads one line of the open pcap file, captures the len of that line,
-        and returns that line to the caller
+        and returns that line to the caller. Not very useful to be honest, this
+        may be deprecated in future versions.
+
+        Inputs:
+
+            None
+        
+        Returns:
+
+            line    : binary encoded line from the pcap file
         """
         line = self.file.readline()
         self.bytes_read += len(line)
@@ -227,7 +247,8 @@ class Parser(object):
 
     def _read_next_message(self) -> None:
         """
-        Read next message from file.
+        Read next message from file - no return value, works by side effect.
+
         Note: using seek() to move past messages that we dont want to read
         doesn't seem to help performance. My theory is that using mmap should
         not help much either given that were typically reading the files from

@@ -18,7 +18,7 @@ REQUIRES_PYTHON = '>=3.7.0'
 VERSION = '0.0.2'
 
 # What packages are required for this module to be executed?
-REQUIRED = []
+REQUIRED = ['requests']
 
 # What packages are optional?
 EXTRAS = {}

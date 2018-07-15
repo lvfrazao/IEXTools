@@ -1,4 +1,4 @@
-# IEX_hist_parser
+# IEX_tools
 
 v 0.0.2
 
@@ -12,9 +12,41 @@ The author and contributors to this repository are not in any way associated wit
 
 The Investors Exchange (IEX) was founded in 2012 by Brad Katsuyama to combat the effect that high frequency trading was having on other stock exchanges. The story of IEX was made famous by John Lewis in his book, _Fast Boys_.
 
-This package is designed to be used in decoding the HIST files that are freely available through IEX. These files contain nanosecond precision information about stocks such as trades and quotes.
+This package aims to provide a variety of tools for using the IEX HIST binary data feed files that are freely available through IEX. These files contain nanosecond precision information about stocks such as trades and quotes.
 
 ## Usage
+
+### Downloader
+
+The `DataDownloader` class can be instantiated without any arguments by simply calling the class.
+
+```Python
+d1 = IEX_hist_parser.DataDownloader()
+```
+
+There are three available methods in this class:
+
+```python
+>>> print([method for method in dir(IEX_hist_parser.DataDownloader) if not method.startswith('_')])
+
+['decompress', 'download', 'download_decompressed']
+```
+
+- download: Downloads the gziped TOPS or DEEP file for a given datetime input
+- decompress: Unzips the compressed HIST file into a pcap
+- download_decompressed: downloads and decompresses the HIST file - deletes the zipped file at the end
+
+Usage:
+
+```Python
+>>> import IEX_hist_parser
+>>> from datetime import datetime
+>>> d1 = IEX_hist_parser.DataDownloader()
+>>> d1.download_decompressed(datetime(2018, 7, 13), feed_type='tops')
+'20180713_IEXTP1_TOPS1.6.pcap'
+```
+
+### Parser
 
 To create a Parser object simply supply the file path as an argument.
 
@@ -86,9 +118,9 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 - Some people say that the quality of data from IEX may be lower due to the lower volume that they handled when compared to other bigger exchanges (not sure how valid this actually is)
 - Unsure how this data is maintained (if at all)
 - The future availability of this data is not guaranteed, IEX may choose to paywall this data in the future
-- It is unclear whether paperwork is required to access this data
+- Data is unadjusted so it would need to be manually adjusted in order to use in a backtesting engine
 
 ## Questions
 
-1. Is the HIST data adjusted for dividends, splits, etc.? If so how often?
-2. Am I required to fill out and submit a Data Agreement prior to accessing the data?
+1. Q: Is the HIST data adjusted for dividends, splits, etc.? If so how often? A: No, HIST data is just a saved version of the live binary trading stream - unadjusted. 
+2. Q: Am I required to fill out and submit a Data Agreement prior to accessing the data? A: According to the IEX API maintainers this is not required to access the historical data

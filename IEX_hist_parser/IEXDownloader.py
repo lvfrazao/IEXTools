@@ -51,7 +51,7 @@ class DataDownloader(object):
         endpoint = f"{self.base_endpoint}/hist?date={date_str}"
         return endpoint
 
-    def _get_download_link(self, date: datetime) -> Dict[str, str]:
+    def _get_download_link(self, date: datetime) -> Dict[str, Dict[str, str]]:
         """
         Extract the download URL and filename from the IEX API for the
         requested HIST file.
@@ -71,19 +71,38 @@ class DataDownloader(object):
         except requests.RequestException as e:
             raise IEXHISTExceptions.RequestsException(e.args)
 
-        links = {}
-        links["TOPS"] = response.json()
+        links: Dict[str, Dict[str, str]] = {}
         for entry in response.json():
-            links[entry["feed"]] = {}
-            links[entry["feed"]]["url"] = entry["link"]
-            links[entry["feed"]]["file"] = (
-                f'{entry["date"]}_{entry["protocol"]}_{entry["feed"]}'
-                f'{entry["version"]}.pcap.gz'
-            )
+            links[entry["feed"]] = {
+                "url": entry["link"],
+                "file": (
+                    f'{entry["date"]}_{entry["protocol"]}_{entry["feed"]}'
+                    f'{entry["version"]}.pcap.gz'
+                ),
+            }
 
         return links
 
     def download(self, date: datetime, feed_type: str) -> str:
+        """
+        Downloads the pcap file (either TOPS or DEEP) for a given date and
+        returns the filename.
+
+        Inputs:
+
+            date        : date of desired HIST file
+            feed_type   : type of feed file requested (either TOPS or HIST)
+        
+        Returns:
+
+            file_name   : name of downloaded file
+        """
+        feed_type = feed_type.upper()
+        if feed_type not in ["TOPS", "DEEP"]:
+            raise IEXHISTExceptions.IEXHISTException(
+                "feed_type must be either TOPS or DEEP"
+            )
+
         link_info = self._get_download_link(date)
         url = link_info[feed_type]["url"]
         filename = link_info[feed_type]["file"]
@@ -118,3 +137,23 @@ class DataDownloader(object):
                 shutil.copyfileobj(f_in, f_out)
         if remove_source:
             os.remove(file_in)
+
+    def download_decompressed(self, date: datetime, feed_type: str) -> str:
+        """
+        Single method to both download the gziped pcap file, but also
+        decompress it and return the filename of the decompressed pcap file.
+
+        Inputs:
+
+            date        : date of desired HIST file
+            feed_type   : type of feed file requested (either TOPS or HIST)
+        
+        Returns:
+
+            file_name   : name of downloaded file
+        """
+        file_name = self.download(date, feed_type)
+        file_in = os.path.join(self.directory, file_name)
+        file_out = os.path.join(self.directory, file_name.replace(".gz", ""))
+        self.decompress(file_in, file_out, remove_source=True)
+        return file_name.replace(".gz", "")

@@ -5,10 +5,12 @@ decode messages. All information for parsing messages is derived from the
 specifications published by IEX on their website as "IEX TOPS Specification":
 https://iextrading.com/docs/IEX%20TOPS%20Specification.pdf
 """
+from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import struct
 from typing import Dict, Union
+from IEXHISTExceptions import ProtocolException
 
 
 # Debating whether this should just be a class variable of SystemEvent. I'm
@@ -103,7 +105,10 @@ class MessageDecoder(object):
         }
 
     def decode_message(self, msg_type: int, binary_msg: bytes) -> Message:
-        fmt = self.DECODE_FMT[msg_type]
+        try:
+            fmt = self.DECODE_FMT[msg_type]
+        except KeyError as e:
+            raise ProtocolException(f'Unknown message type: {e.args}')
         decoded_msg = struct.unpack(fmt, binary_msg)
         msg = self.MSG_CLS[msg_type](*decoded_msg)
         return msg
@@ -112,8 +117,11 @@ class MessageDecoder(object):
 @dataclass
 class Message(object):
     """
-    Grouping common operations among the different message types. Might
-    implement if enough methods need to be shared.
+    Superclass to all message types - should never be instantiated.
+
+    Grouping common operations among the different message types. Processes any
+    bytes objects into string objects and computes the prices in messages as
+    floats.
     """
 
     __slots__ = "date_time"
