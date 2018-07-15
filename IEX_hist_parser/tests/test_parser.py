@@ -13,7 +13,7 @@ class ParserTestCases(unittest.TestCase):
     """
 
     def setUp(self):
-        self.test_file = 'input_files\\example1.pcap'
+        self.test_file = "input_files\\example1.pcap"
         self.p = iex.Parser(self.test_file)
 
     def tearDown(self):
@@ -25,11 +25,7 @@ class ParserTestCases(unittest.TestCase):
         functionality (loads a file and doesn't raise an exception)
         """
 
-        self.assertEqual(
-            1,
-            1,
-            msg=f'Test with {self.test_file}'
-        )
+        self.assertEqual(1, 1, msg=f"Test with {self.test_file}")
 
     def test_seek_header(self):
         """
@@ -40,11 +36,11 @@ class ParserTestCases(unittest.TestCase):
         self.assertEqual(self.p.bytes_read, 1930)
 
     def test_end_to_end(self):
-        test_file = 'input_files\\example1.pcap'
+        test_file = "input_files\\example1.pcap"
         with iex.Parser(test_file) as p:
             for message in p:
                 pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

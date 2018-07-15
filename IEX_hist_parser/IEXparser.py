@@ -46,44 +46,45 @@ class Parser(object):
 
     Parser(filepath)
     """
+
     def __init__(self, file_path, tops=True, deep=False):
         self.file_path = file_path
         self.tops = tops
         self.deep = deep
         self.file = self._load(file_path)
         # IEX TP Header Structure
-        self.version = b'\x01'
-        self.reserved = b'\x00'
+        self.version = b"\x01"
+        self.reserved = b"\x00"
         if tops and not deep:
-            self.protocol_id = b'\x03\x80'
+            self.protocol_id = b"\x03\x80"
         elif deep:
-            self.protocol_id = b'\x04\x80'
-            raise NotImplementedError('Parsing of DEEP files not implemented')
+            self.protocol_id = b"\x04\x80"
+            raise NotImplementedError("Parsing of DEEP files not implemented")
         elif deep and tops:
             raise ValueError('"deep" and "tops" arguments cannot both be true')
-        self.channel_id = b'\x01\x00\x00\x00'
+        self.channel_id = b"\x01\x00\x00\x00"
         self.session_id = self._get_session_id(file_path)
         self.tp_header = (
-            self.version +
-            self.reserved +
-            self.protocol_id +
-            self.channel_id +
-            self.session_id
-            )
+            self.version
+            + self.reserved
+            + self.protocol_id
+            + self.channel_id
+            + self.session_id
+        )
         self.messages_left = 0
         self.bytes_read = 0
 
         self.messages_types = {
-            messages.ShortSalePriceSale: b'\x50',
-            messages.TradeBreak: b'\x42',
-            messages.AuctionInformation: b'\x41',
-            messages.TradeReport: b'\x54',
-            messages.OfficialPrice: b'\x58',
-            messages.SystemEvent: b'\x53',
-            messages.SecurityDirective: b'\x44',
-            messages.TradingStatus: b'\x48',
-            messages.OperationalHalt: b'\x4f',
-            messages.QuoteUpdate: b'\x51',
+            messages.ShortSalePriceSale: b"\x50",
+            messages.TradeBreak: b"\x42",
+            messages.AuctionInformation: b"\x41",
+            messages.TradeReport: b"\x54",
+            messages.OfficialPrice: b"\x58",
+            messages.SystemEvent: b"\x53",
+            messages.SecurityDirective: b"\x44",
+            messages.TradingStatus: b"\x48",
+            messages.OperationalHalt: b"\x4f",
+            messages.QuoteUpdate: b"\x51",
         }
 
         self.decoder = messages.MessageDecoder()
@@ -116,7 +117,7 @@ class Parser(object):
         Function to load a TOPS File into the parser. Simply returns a file
         object which other methods will iterate over.
         """
-        return open(file_path, 'rb')
+        return open(file_path, "rb")
 
     def _get_session_id(self, file_path):
         """
@@ -127,12 +128,12 @@ class Parser(object):
             return self.session_id
         except AttributeError:
             iex_header_start = (
-                self.version +
-                self.reserved +
-                self.protocol_id +
-                self.channel_id
+                self.version
+                + self.reserved
+                + self.protocol_id
+                + self.channel_id
             )
-            with open(file_path, 'rb') as market_file:
+            with open(file_path, "rb") as market_file:
                 for line in market_file:
                     if iex_header_start in line:
                         line = line.split(iex_header_start)[1]
@@ -148,7 +149,7 @@ class Parser(object):
         if line:
             return line
         else:
-            raise StopIteration('Reached end of PCAP file')
+            raise StopIteration("Reached end of PCAP file")
 
     def read_chunk(self, chunk=1024):
         """
@@ -160,7 +161,7 @@ class Parser(object):
         if data:
             return data
         else:
-            raise StopIteration('Reached end of PCAP file')
+            raise StopIteration("Reached end of PCAP file")
 
     def _seek_header(self):
         """
@@ -179,15 +180,14 @@ class Parser(object):
                     found = True
             else:
                 i = 0
-        header_fmt = '<hhqqq'
+        header_fmt = "<hhqqq"
         remaining_header = struct.unpack(header_fmt, self.read_chunk(28))
         self.cur_msg_payload_len = remaining_header[0]
         self.messages_left = remaining_header[1]
         self.cur_stream_offset = remaining_header[2]
         self.first_sequence_number = remaining_header[3]
         self.cur_send_time = datetime.fromtimestamp(
-            remaining_header[4] / 10**9,
-            tz=timezone.utc
+            remaining_header[4] / 10 ** 9, tz=timezone.utc
         )
 
     def get_next_message(self, allowed=None):
@@ -201,7 +201,7 @@ class Parser(object):
         rate of messages analyzed).
         """
         if not isinstance(allowed, (list, tuple)) and allowed is not None:
-            raise ValueError('allowed must be either a list or tuple')
+            raise ValueError("allowed must be either a list or tuple")
         if allowed:
             allowed = [self.messages_types[a][0] for a in allowed]
 
@@ -228,7 +228,7 @@ class Parser(object):
         not help much either given that were typically reading the files from
         beginning to end sequentially.
         """
-        message_len = struct.unpack('<h', self.read_chunk(2))[0]
+        message_len = struct.unpack("<h", self.read_chunk(2))[0]
         self.messages_left -= 1
         self.message_type = self.read_chunk(1)[0]
         self.message_binary = self.read_chunk(message_len - 1)
