@@ -2,7 +2,7 @@
 
 v 0.0.2
 
-This package provides tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: https://iextrading.com/trading/market-data/
+This package provides tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/trading/market-data/>
 
 ## Disclaimer
 
@@ -35,6 +35,8 @@ There are three available methods in this class:
 - download: Downloads the gziped TOPS or DEEP file for a given datetime input
 - decompress: Unzips the compressed HIST file into a pcap
 - download_decompressed: downloads and decompresses the HIST file - deletes the zipped file at the end
+
+**Warning, IEX HIST files are generally around 500mb compressed >1.5gb uncompressed**
 
 Usage:
 
@@ -93,7 +95,8 @@ with Parser(file_path) as iex_messages:
 
 Benchmarks:
 On my personal laptop (Lenovo ThinkPad X1 Carbon, Windows 10):
-```
+
+```text
 Beginning test - 1,000,000 messages - all messages, not printing
 Parsed 1,000,000 messages in 52.2 seconds -- 19141.6 messages per second
 
@@ -109,18 +112,20 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 - IEX Transport Protocol documentation: <https://iextrading.com/docs/IEX%20Transport%20Specification.pdf>
 - IEX TOPS documentation: <https://iextrading.com/docs/IEX%20TOPS%20Specification.pdf>
 
-## Pros
+## Discussion
+
+### Pros
 
 - This is tick by tick historical data offered by IEX for free - other exchanges typically charge large amounts of money for access to similar data
 
-## Cons
+### Cons
 
 - Some people say that the quality of data from IEX may be lower due to the lower volume that they handled when compared to other bigger exchanges (not sure how valid this actually is)
 - Unsure how this data is maintained (if at all)
 - The future availability of this data is not guaranteed, IEX may choose to paywall this data in the future
 - Data is unadjusted so it would need to be manually adjusted in order to use in a backtesting engine
 
-## Questions
+### Questions
 
-1. Q: Is the HIST data adjusted for dividends, splits, etc.? If so how often? A: No, HIST data is just a saved version of the live binary trading stream - unadjusted. 
+1. Q: Is the HIST data adjusted for dividends, splits, etc.? If so how often? A: No, HIST data is just a saved version of the live binary trading stream - unadjusted.
 2. Q: Am I required to fill out and submit a Data Agreement prior to accessing the data? A: According to the IEX API maintainers this is not required to access the historical data

@@ -38,7 +38,7 @@ from __future__ import annotations
 import struct
 from datetime import datetime, timezone
 from . import messages
-from typing import BinaryIO, Optional, Iterator
+from typing import BinaryIO, Optional, Iterator, Union, List, Tuple
 
 
 class Parser(object):
@@ -133,7 +133,7 @@ class Parser(object):
         inputs:
 
             file_path   : path to pcap file to be decoded
-        
+
         Returns:
 
             session_id  : binary encoded session ID
@@ -162,7 +162,7 @@ class Parser(object):
         Inputs:
 
             None
-        
+
         Returns:
 
             line    : binary encoded line from the pcap file
@@ -177,7 +177,15 @@ class Parser(object):
     def read_chunk(self, chunk: int = 1024) -> bytes:
         """
         Reads a single chunk of arbitrary size from the open file object and
-        returns that chunk to the caller
+        returns that chunk to the caller.
+
+        Inputs:
+
+            chunk   : determines the chunk size to be read from file
+
+        Returns:
+
+            data    : binary encoded chunk from the pcap file
         """
         data = self.file.read(chunk)
         self.bytes_read += len(data)
@@ -214,7 +222,10 @@ class Parser(object):
         )
 
     def get_next_message(
-        self, allowed: Optional[messages.Message] = None
+        self,
+        allowed: Optional[
+            Union[List[messages.Message], Tuple[messages.Message]]
+        ] = None,
     ) -> messages.Message:
         """
         Returns the next message in the pcap file. The user may optionally
@@ -224,17 +235,25 @@ class Parser(object):
         shown reduced rate of messages returned when allowed messages are
         specified (note the rate of messages returned is lower, but not the
         rate of messages analyzed).
+
+        Inputs:
+
+            allowed : types of messages to be returned
+
+        Returns:
+
+            message : decoded message from IEX file
         """
         if not isinstance(allowed, (list, tuple)) and allowed is not None:
             raise ValueError("allowed must be either a list or tuple")
         if allowed:
-            allowed = [self.messages_types[a][0] for a in allowed]
+            allowed_types = [self.messages_types[a][0] for a in allowed]
 
         while not self.messages_left:
             self._seek_header()
 
         self._read_next_message()
-        while allowed is not None and self.message_type not in allowed:
+        while allowed is not None and self.message_type not in allowed_types:
             while not self.messages_left:
                 self._seek_header()
 

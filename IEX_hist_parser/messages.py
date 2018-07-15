@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import struct
-from typing import Dict, Union
+from typing import Dict, Union, Type
 from IEXHISTExceptions import ProtocolException
 
 
@@ -100,7 +100,7 @@ class MessageDecoder(object):
         self.DECODE_FMT: Dict[int, str] = {
             msg[0]: self.message_types[msg]["fmt"] for msg in self.message_types
         }
-        self.MSG_CLS: Dict[int, Message] = {
+        self.MSG_CLS: Dict[int, Type[Message]] = {
             msg[0]: self.message_types[msg]["cls"] for msg in self.message_types
         }
 

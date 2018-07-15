@@ -92,7 +92,7 @@ class DataDownloader(object):
 
             date        : date of desired HIST file
             feed_type   : type of feed file requested (either TOPS or HIST)
-        
+
         Returns:
 
             file_name   : name of downloaded file
@@ -147,7 +147,7 @@ class DataDownloader(object):
 
             date        : date of desired HIST file
             feed_type   : type of feed file requested (either TOPS or HIST)
-        
+
         Returns:
 
             file_name   : name of downloaded file
