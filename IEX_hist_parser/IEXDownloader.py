@@ -59,7 +59,7 @@ class DataDownloader(object):
         Inputs:
 
             date    : date of HIST data being requested
-   
+
         Returns:
 
             links   : contains URL and name of desired file
