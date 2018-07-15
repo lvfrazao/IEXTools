@@ -37,6 +37,7 @@ Parsed 1,000,000 messages in 54.0 seconds -- 18512.9 messages per second
 import struct
 from datetime import datetime, timezone
 from . import messages
+from typing import BinaryIO, Optional, Iterator
 
 
 class Parser(object):
@@ -47,7 +48,9 @@ class Parser(object):
     Parser(filepath)
     """
 
-    def __init__(self, file_path, tops=True, deep=False):
+    def __init__(
+        self, file_path: str, tops: bool = True, deep: bool = False
+    ) -> None:
         self.file_path = file_path
         self.tops = tops
         self.deep = deep
@@ -89,13 +92,13 @@ class Parser(object):
 
         self.decoder = messages.MessageDecoder()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Parser("{self.file_path}", tops={self.tops}, deep={self.deep})'
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         return self
 
-    def __next__(self):
+    def __next__(self) -> messages.Message:
         """
         Meant to allow the user to use the Parser object in a loop to read
         through all messages in a pcap file similar to reading all lines in a
@@ -106,20 +109,20 @@ class Parser(object):
         """
         return self.get_next_message()
 
-    def __enter__(self):
+    def __enter__(self) -> Parser:
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args) -> None:
         self.file.close()
 
-    def _load(self, file_path):
+    def _load(self, file_path: str) -> BinaryIO:
         """
         Function to load a TOPS File into the parser. Simply returns a file
         object which other methods will iterate over.
         """
         return open(file_path, "rb")
 
-    def _get_session_id(self, file_path):
+    def _get_session_id(self, file_path: str) -> None:
         """
         The session ID is unique every day. Simply denotes the day. We use this
         to build the IEX Transport Protocol header.
@@ -139,7 +142,7 @@ class Parser(object):
                         line = line.split(iex_header_start)[1]
                         return line[:4]
 
-    def read_next_line(self):
+    def read_next_line(self) -> bytes:
         """
         Reads one line of the open pcap file, captures the len of that line,
         and returns that line to the caller
@@ -151,7 +154,7 @@ class Parser(object):
         else:
             raise StopIteration("Reached end of PCAP file")
 
-    def read_chunk(self, chunk=1024):
+    def read_chunk(self, chunk: int = 1024) -> bytes:
         """
         Reads a single chunk of arbitrary size from the open file object and
         returns that chunk to the caller
@@ -163,7 +166,7 @@ class Parser(object):
         else:
             raise StopIteration("Reached end of PCAP file")
 
-    def _seek_header(self):
+    def _seek_header(self) -> None:
         """
         Scans through the open file until it finds a complete version of the
         Transport Protocol Header which means that there is at least one
@@ -190,7 +193,9 @@ class Parser(object):
             remaining_header[4] / 10 ** 9, tz=timezone.utc
         )
 
-    def get_next_message(self, allowed=None):
+    def get_next_message(
+        self, allowed: Optional[messages.Message] = None
+    ) -> messages.Message:
         """
         Returns the next message in the pcap file. The user may optionally
         provide an 'allowed' argument to specify which type of messages they
@@ -220,7 +225,7 @@ class Parser(object):
         )
         return self.message
 
-    def _read_next_message(self):
+    def _read_next_message(self) -> None:
         """
         Read next message from file.
         Note: using seek() to move past messages that we dont want to read

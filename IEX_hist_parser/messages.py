@@ -8,6 +8,7 @@ https://iextrading.com/docs/IEX%20TOPS%20Specification.pdf
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import struct
+from typing import Dict, Union
 
 
 # Debating whether this should just be a class variable of SystemEvent. I'm
@@ -33,7 +34,7 @@ trading_status_messages = {
 
 
 class MessageDecoder(object):
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Some notes on data types used in decoding IEX messages:
         B: unsigned byte
@@ -42,7 +43,7 @@ class MessageDecoder(object):
         s: string (size denoted by preceding number)
         q: signed long long (8 bytes)
         """
-        self.message_types = {
+        self.message_types: Dict[bytes, Dict[str, Union[str, Message]]] = {
             b"\x53": {
                 "str": "System Event Message",
                 "cls": SystemEvent,
@@ -94,14 +95,14 @@ class MessageDecoder(object):
                 "fmt": "<1sq8sLqqL1sBLqqqq",
             },
         }
-        self.DECODE_FMT = {
+        self.DECODE_FMT: Dict[int, str] = {
             msg[0]: self.message_types[msg]["fmt"] for msg in self.message_types
         }
-        self.MSG_CLS = {
+        self.MSG_CLS: Dict[int, Message] = {
             msg[0]: self.message_types[msg]["cls"] for msg in self.message_types
         }
 
-    def decode_message(self, msg_type, binary_msg):
+    def decode_message(self, msg_type: int, binary_msg: bytes) -> Message:
         fmt = self.DECODE_FMT[msg_type]
         decoded_msg = struct.unpack(fmt, binary_msg)
         msg = self.MSG_CLS[msg_type](*decoded_msg)
