@@ -38,7 +38,9 @@ from __future__ import annotations
 import struct
 from datetime import datetime, timezone
 from . import messages
-from typing import BinaryIO, Optional, Iterator, Union, List, Tuple
+from typing import BinaryIO, Optional, Iterator, Union, List, Tuple, Dict
+from .IEXHISTExceptions import ProtocolException
+from .TypeAliases import AllMessages
 
 
 class Parser(object):
@@ -79,7 +81,7 @@ class Parser(object):
         self.messages_left = 0
         self.bytes_read = 0
 
-        self.messages_types = {
+        self.messages_types: Dict[AllMessages, bytes] = {
             messages.ShortSalePriceSale: b"\x50",
             messages.TradeBreak: b"\x42",
             messages.AuctionInformation: b"\x41",
@@ -100,7 +102,7 @@ class Parser(object):
     def __iter__(self) -> Iterator:
         return self
 
-    def __next__(self) -> messages.Message:
+    def __next__(self) -> AllMessages:
         """
         Meant to allow the user to use the Parser object in a loop to read
         through all messages in a pcap file similar to reading all lines in a
@@ -152,6 +154,9 @@ class Parser(object):
                     if iex_header_start in line:
                         line = line.split(iex_header_start)[1]
                         return line[:4]
+        raise ProtocolException(
+            "Session ID could not be found in the supplied file"
+        )
 
     def read_next_line(self) -> bytes:
         """
@@ -223,10 +228,8 @@ class Parser(object):
 
     def get_next_message(
         self,
-        allowed: Optional[
-            Union[List[messages.Message], Tuple[messages.Message]]
-        ] = None,
-    ) -> messages.Message:
+        allowed: Optional[Union[List[AllMessages], Tuple[AllMessages]]] = None,
+    ) -> AllMessages:
         """
         Returns the next message in the pcap file. The user may optionally
         provide an 'allowed' argument to specify which type of messages they

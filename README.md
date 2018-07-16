@@ -4,9 +4,11 @@ v 0.0.2
 
 This package provides tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/trading/market-data/>
 
-## Disclaimer
+## Disclaimers
 
 The author and contributors to this repository are not in any way associated with IEX. This code is provided AS IS with no warranties or any guarantees. It is entirely possible that at any moment this package will not work either due to a programming error or due to a change from IEX.
+
+This package is under active development and may be subject to regular breaking changes.
 
 ## Executive Summary
 
@@ -129,3 +131,29 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 
 1. Q: Is the HIST data adjusted for dividends, splits, etc.? If so how often? A: No, HIST data is just a saved version of the live binary trading stream - unadjusted.
 2. Q: Am I required to fill out and submit a Data Agreement prior to accessing the data? A: According to the IEX API maintainers this is not required to access the historical data
+
+## Release Notes
+
+### 0.0.1
+
+- `Parser` class - allows decoding of HIST binary data
+- `Message` objects defined - each IEX message type defined in TOPS now has an associated Python object
+
+### 0.0.2
+
+- `DataDownloader` class: allows user to download specified HIST files
+- Packaging for easy PIP install
+- Added context manager and iteration support to `Parser` object
+- Added typing support
+- Added some test coverage (still needs improvement)
+
+### Future Focus
+
+- Need additional tests
+- Review typing functionality
+- Build IEX web API wrapper for real time information on companies
+
+## Requirements
+
+- Python 3.7
+- requests

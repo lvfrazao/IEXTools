@@ -10,7 +10,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import struct
 from typing import Dict, Union, Type
-from IEXHISTExceptions import ProtocolException
+from .IEXHISTExceptions import ProtocolException
+from .TypeAliases import AllMessages
 
 
 # Debating whether this should just be a class variable of SystemEvent. I'm
@@ -45,7 +46,7 @@ class MessageDecoder(object):
         s: string (size denoted by preceding number)
         q: signed long long (8 bytes)
         """
-        self.message_types: Dict[bytes, Dict[str, Union[str, Message]]] = {
+        self.message_types: Dict[bytes, Dict[str, Union[str, AllMessages]]] = {
             b"\x53": {
                 "str": "System Event Message",
                 "cls": SystemEvent,
@@ -100,11 +101,11 @@ class MessageDecoder(object):
         self.DECODE_FMT: Dict[int, str] = {
             msg[0]: self.message_types[msg]["fmt"] for msg in self.message_types
         }
-        self.MSG_CLS: Dict[int, Type[Message]] = {
+        self.MSG_CLS: Dict[int, Type[AllMessages]] = {
             msg[0]: self.message_types[msg]["cls"] for msg in self.message_types
         }
 
-    def decode_message(self, msg_type: int, binary_msg: bytes) -> Message:
+    def decode_message(self, msg_type: int, binary_msg: bytes) -> AllMessages:
         try:
             fmt = self.DECODE_FMT[msg_type]
         except KeyError as e:
