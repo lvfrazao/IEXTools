@@ -22,12 +22,6 @@ Build a small DB with the IEX historical data to perform backtesting of trading 
 14. Proper packaging and hosting on PyPi
 15. Pick a new cooler name for this project
 
-## Questions
-
-1. How do we keep the DB updated (e.g., with regards to stock splits) - maybe do a periodic refresh
-2. How much data do we want to retain?
-3. Do the HIST files suffer from survivorship bias?
-
 ## External Resources
 
 Download page: <https://iextrading.com/trading/market-data/#hist-download>

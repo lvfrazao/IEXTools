@@ -5,121 +5,147 @@ decode messages. All information for parsing messages is derived from the
 specifications published by IEX on their website as "IEX TOPS Specification":
 https://iextrading.com/docs/IEX%20TOPS%20Specification.pdf
 """
-from dataclasses import dataclass, field
+from __future__ import annotations
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import struct
+from typing import Dict, Union, Type
+from .IEXHISTExceptions import ProtocolException
+from .TypeAliases import AllMessages
 
 
 # Debating whether this should just be a class variable of SystemEvent. I'm
 # afraid that placing it in the class will create a copy of this dict for every
 # instance of SystemEvent.
 system_event_types = {
-    79: 'start_of_messages',
-    83: 'start_of_system_hours',
-    82: 'start_of_regular_hours',
-    67: 'end_of_messages',
-    69: 'end_of_system_hours',
-    77: 'end_of_regular_hours',
+    79: "start_of_messages",
+    83: "start_of_system_hours",
+    82: "start_of_regular_hours",
+    67: "end_of_messages",
+    69: "end_of_system_hours",
+    77: "end_of_regular_hours",
 }
 
 trading_status_messages = {
-    'H': 'Trading halted across all US equity markets',
-    'O': 'Trading halt released into an Order Acceptance Period on IEX '
-         '(IEX-listed securities only)',
-    'P': 'Trading paused and Order Acceptance Period on IEX '
-         '(IEX-listed securities only)',
-    'T': 'Trading on IEX',
+    "H": "Trading halted across all US equity markets",
+    "O": "Trading halt released into an Order Acceptance Period on IEX "
+    "(IEX-listed securities only)",
+    "P": "Trading paused and Order Acceptance Period on IEX "
+    "(IEX-listed securities only)",
+    "T": "Trading on IEX",
 }
 
 
-def decode_message(msg_type, binary_msg):
-    """
-    Some notes on data types used in decoding IEX messages:
-    B: unsigned byte
-    H: short unsigned int (2 bytes)
-    L: long unsigned int (4 bytes)
-    s: string (size denoted by preceding number)
-    q: signed long long (8 bytes)
-    """
-    message_types = {
-        b'\x53': {
-            'str': 'System Event Message',
-            'cls': SystemEvent,
-            'fmt': '<Bq',
-        },
-        b'\x44': {
-            'str': 'Security Directory Message',
-            'cls': SecurityDirective,
-            'fmt': '<Bq8sLqB',
-        },
-        b'\x48': {
-            'str': 'Trading Status Message',
-            'cls': TradingStatus,
-            'fmt': '<1sq8s4s',
-        },
-        b'\x4f': {
-            'str': 'Operational Halt Status Message',
-            'cls': OperationalHalt,
-            'fmt': '<1sq8s',
-        },
-        b'\x50': {
-            'str': 'Short Sale Price Test Status Message',
-            'cls': ShortSalePriceSale,
-            'fmt': '<Bq8s1s',
-        },
-        b'\x51': {
-            'str': 'Quote Update Message',
-            'cls': QuoteUpdate,
-            'fmt': '<Bq8sLqqL',
-        },
-        b'\x54': {
-            'str': 'Trade Report Message',
-            'cls': TradeReport,
-            'fmt': '<Bq8sLqq',
-        },
-        b'\x58': {
-            'str': 'Official Price Message',
-            'cls': OfficialPrice,
-            'fmt': '<1sq8sq',
-        },
-        b'\x42': {
-            'str': 'Trade Break Message',
-            'cls': TradeBreak,
-            'fmt': '<1sq8sqq',
-        },
-        b'\x41': {
-            'str': 'Auction Information Message',
-            'cls': AuctionInformation,
-            'fmt': '<1sq8sLqqL1sBLqqqq',
-        },
-    }
-    DECODE_FMT = {msg[0]: message_types[msg]['fmt'] for msg in message_types}
-    MSG_CLS = {msg[0]: message_types[msg]['cls'] for msg in message_types}
+class MessageDecoder(object):
+    def __init__(self) -> None:
+        """
+        Some notes on data types used in decoding IEX messages:
+        B: unsigned byte
+        H: short unsigned int (2 bytes)
+        L: long unsigned int (4 bytes)
+        s: string (size denoted by preceding number)
+        q: signed long long (8 bytes)
+        """
+        self.message_types: Dict[bytes, Dict[str, Union[str, AllMessages]]] = {
+            b"\x53": {
+                "str": "System Event Message",
+                "cls": SystemEvent,
+                "fmt": "<Bq",
+            },
+            b"\x44": {
+                "str": "Security Directory Message",
+                "cls": SecurityDirective,
+                "fmt": "<Bq8sLqB",
+            },
+            b"\x48": {
+                "str": "Trading Status Message",
+                "cls": TradingStatus,
+                "fmt": "<1sq8s4s",
+            },
+            b"\x4f": {
+                "str": "Operational Halt Status Message",
+                "cls": OperationalHalt,
+                "fmt": "<1sq8s",
+            },
+            b"\x50": {
+                "str": "Short Sale Price Test Status Message",
+                "cls": ShortSalePriceSale,
+                "fmt": "<Bq8s1s",
+            },
+            b"\x51": {
+                "str": "Quote Update Message",
+                "cls": QuoteUpdate,
+                "fmt": "<Bq8sLqqL",
+            },
+            b"\x54": {
+                "str": "Trade Report Message",
+                "cls": TradeReport,
+                "fmt": "<Bq8sLqq",
+            },
+            b"\x58": {
+                "str": "Official Price Message",
+                "cls": OfficialPrice,
+                "fmt": "<1sq8sq",
+            },
+            b"\x42": {
+                "str": "Trade Break Message",
+                "cls": TradeBreak,
+                "fmt": "<1sq8sqq",
+            },
+            b"\x41": {
+                "str": "Auction Information Message",
+                "cls": AuctionInformation,
+                "fmt": "<1sq8sLqqL1sBLqqqq",
+            },
+        }
+        self.DECODE_FMT: Dict[int, str] = {
+            msg[0]: self.message_types[msg]["fmt"] for msg in self.message_types
+        }
+        self.MSG_CLS: Dict[int, Type[AllMessages]] = {
+            msg[0]: self.message_types[msg]["cls"] for msg in self.message_types
+        }
 
-    decoded_msg = struct.unpack(DECODE_FMT[msg_type], binary_msg)
-    return MSG_CLS[msg_type](*decoded_msg)
+    def decode_message(self, msg_type: int, binary_msg: bytes) -> AllMessages:
+        try:
+            fmt = self.DECODE_FMT[msg_type]
+        except KeyError as e:
+            raise ProtocolException(f'Unknown message type: {e.args}')
+        decoded_msg = struct.unpack(fmt, binary_msg)
+        msg = self.MSG_CLS[msg_type](*decoded_msg)
+        return msg
 
 
 @dataclass
 class Message(object):
     """
-    Grouping common operations among the different message types. Might
-    implement if enough methods need to be shared.
+    Superclass to all message types - should never be instantiated.
+
+    Grouping common operations among the different message types. Processes any
+    bytes objects into string objects and computes the prices in messages as
+    floats.
     """
-    __slots__ = ('date_time')
+
+    __slots__ = "date_time"
 
     def __post_init__(self):
         self.date_time = datetime.fromtimestamp(
-            self.timestamp / 10**9,
-            tz=timezone.utc
+            self.timestamp / 10 ** 9, tz=timezone.utc
         )
-        str_fields = 'symbol', 'status', 'reason', 'detail', 'halt_status'
+        str_fields = "symbol", "status", "reason", "detail", "halt_status"
         for attrib in str_fields:
             if hasattr(self, attrib):
-                setattr(
-                    self, attrib,
-                    getattr(self, attrib).decode('utf-8').strip()
-                )
+                if isinstance(getattr(self, attrib), bytes):
+                    setattr(
+                        self,
+                        attrib,
+                        getattr(self, attrib).decode("utf-8").strip(),
+                    )
+
+        int_prices = [p for p in self.__slots__ if "price" in p and "int" in p]
+
+        for int_price in int_prices:
+            attrib = int_price.split("_int")[0]
+            setattr(self, attrib, getattr(self, int_price) / 10 ** 4)
 
 
 @dataclass
@@ -130,7 +156,8 @@ class SystemEvent(Message):
     single message disseminated per channel for each System Event type within a
     given trading session."
     """
-    __slots__ = ('system_event', 'timestamp', 'date_time', 'system_event_str')
+
+    __slots__ = ("system_event", "timestamp", "system_event_str")
     system_event: int  # 1 byte
     timestamp: int  # 8 bytes
 
@@ -147,9 +174,15 @@ class SecurityDirective(Message):
     the pre-market spin, IEX will use the Security Directory Message to relay
     changes for an individual security"
     """
+
     __slots__ = (
-        'flags', 'timestamp', 'symbol', 'round_lot_size', 'adjusted_poc_close',
-        'luld_tire', 'price'
+        "flags",
+        "timestamp",
+        "symbol",
+        "round_lot_size",
+        "adjusted_poc_close",
+        "luld_tire",
+        "price",
     )
     flags: int  # 1 byte
     timestamp: int  # 8 bytes
@@ -157,10 +190,6 @@ class SecurityDirective(Message):
     round_lot_size: int  # 4 bytes
     adjusted_poc_close: int  # 8 bytes
     luld_tire: int  # 1 byte
-
-    def __post_init__(self):
-        Message.__post_init__(self)
-        price = self.adjusted_poc_close / 10**4
 
 
 @dataclass
@@ -183,9 +212,13 @@ class TradingStatus(Message):
         o MCB1: Market-Wide Circuit Breaker Level 1 Breached
         o MCB2: Market-Wide Circuit Breaker Level 2 Breached
     """
+
     __slots__ = (
-        'status', 'timestamp', 'symbol', 'reason', 'date_time',
-        'trading_status_message'
+        "status",
+        "timestamp",
+        "symbol",
+        "reason",
+        "trading_status_message",
     )
     status: str  # 1 byte
     timestamp: int  # 8 bytes, nanosecond epoch time
@@ -204,7 +237,8 @@ class OperationalHalt(Message):
     one or more securities on IEX for operational reasons and indicates such
     operational halt using the Operational Halt Status Message."
     """
-    __slots__ = ('halt_status', 'timestamp', 'symbol', 'date_time')
+
+    __slots__ = ("halt_status", "timestamp", "symbol")
     halt_status: str  # 1 byte
     timestamp: int  # 8 bytes
     symbol: str  # 8 bytes
@@ -217,7 +251,8 @@ class ShortSalePriceSale(Message):
     Regulation SHO, the Short Sale Price Test Message is used to indicate when
     a short sale price test restriction is in effect for a security."
     """
-    __slots__ = ('short_sale_status', 'timestamp', 'symbol', 'detail', 'date_time')
+
+    __slots__ = ("short_sale_status", "timestamp", "symbol", "detail")
     short_sale_status: int  # 1 byte
     timestamp: int  # 8 bytes
     symbol: str  # 8 bytes
@@ -231,9 +266,17 @@ class QuoteUpdate(Message):
     Update Message each time IEX's best bid or offer quotation is updated
     during the trading day."
     """
+
     __slots__ = (
-        'flags', 'timestamp', 'symbol', 'bid_size', 'bid_price_int',
-        'ask_price_int', 'ask_size', 'bid_price', 'ask_price', 'date_time'
+        "flags",
+        "timestamp",
+        "symbol",
+        "bid_size",
+        "bid_price_int",
+        "ask_price_int",
+        "ask_size",
+        "bid_price",
+        "ask_price",
     )
     flags: int  # 1 byte
     timestamp: int  # 8 bytes
@@ -243,11 +286,6 @@ class QuoteUpdate(Message):
     ask_price_int: int  # 8 bytes - Best quoted ask price
     ask_size: int  # 4 bytes  - Aggregate quoted best ask size
 
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.bid_price = self.bid_price_int / 10**4
-        self.ask_price = self.ask_price_int / 10**4
-
 
 @dataclass
 class TradeReport(Message):
@@ -256,9 +294,15 @@ class TradeReport(Message):
     an order on the IEX Order Book is executed in whole or in part. TOPS sends
     a Trade Report Message for every individual fill."
     """
+
     __slots__ = (
-        'flags', 'timestamp', 'symbol', 'size', 'price_int', 'trade_id',
-        'date_time', 'price'
+        "flags",
+        "timestamp",
+        "symbol",
+        "size",
+        "price_int",
+        "trade_id",
+        "price",
     )
     flags: int  # 1 byte
     timestamp: int  # 8 bytes
@@ -266,10 +310,6 @@ class TradeReport(Message):
     size: int  # 4 bytes - Trade volume
     price_int: int  # 8 bytes - Trade price
     trade_id: int  # 8 bytes - Trade ID, unique within the day
-
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.price = self.price_int / 10**4
 
 
 @dataclass
@@ -279,17 +319,12 @@ class OfficialPrice(Message):
     each IEX-listed security to indicate the IEX Official Opening Price and IEX
     Official Closing Price."
     """
-    __slots__ = (
-        'price_type', 'timestamp', 'symbol', 'price_int', 'date_time', 'price'
-    )
+
+    __slots__ = ("price_type", "timestamp", "symbol", "price_int", "price")
     price_type: str  # 1 byte
     timestamp: int  # 8 byte
     symbol: str  # 8 bytes
     price_int: int  # 8 bytes
-
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.price = self.price_int / 10**4
 
 
 @dataclass
@@ -299,22 +334,17 @@ class TradeBreak(Message):
     an execution on IEX is broken on that same trading day. Trade breaks are
     rare and only affect applications that rely upon IEX execution based data."
     """
-    __slots__ = (
-        'price_type', 'timestamp', 'symbol', 'price_int', 'date_time', 'price'
-    )
+
+    __slots__ = ("price_type", "timestamp", "symbol", "price_int", "price")
     price_type: str  # 1 byte
     timestamp: int  # 8 byte
     symbol: str  # 8 bytes
     price_int: int  # 8 bytes
     trade_id: int  # 8 bytes
 
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.price = self.price_int / 10**4
-
 
 @dataclass
-class AuctionInformation(object):
+class AuctionInformation(Message):
     """
     From the TOPS specification document: "TOPS broadcasts an Auction
     Information Message every one second between the Lock-in Time and the
@@ -322,16 +352,28 @@ class AuctionInformation(object):
     Period for IPO, Halt, and Volatility Auctions. Only IEX listed securities
     are eligible for IEX Auctions."
     """
+
     __slots__ = (
-        'auction_type', 'timestamp', 'symbol', 'paired_shares',
-        'reference_price_int', 'indicative_clearing_price_int',
-        'imbalance_shares', 'imbalance_side', 'extension_number',
-        'scheduled_auction_time', 'auction_book_clearing_price_int',
-        'collar_reference_price_int', 'lower_auction_collar_price_int',
-        'upper_auction_collar_price_int', 'reference_price',
-        'indicative_clearing_price', 'auction_book_clearing_price',
-        'collar_reference_price', 'lower_auction_collar_price',
-        'upper_auction_collar_price', 'date_time'
+        "auction_type",
+        "timestamp",
+        "symbol",
+        "paired_shares",
+        "reference_price_int",
+        "indicative_clearing_price_int",
+        "imbalance_shares",
+        "imbalance_side",
+        "extension_number",
+        "scheduled_auction_time",
+        "auction_book_clearing_price_int",
+        "collar_reference_price_int",
+        "lower_auction_collar_price_int",
+        "upper_auction_collar_price_int",
+        "reference_price",
+        "indicative_clearing_price",
+        "auction_book_clearing_price",
+        "collar_reference_price",
+        "lower_auction_collar_price",
+        "upper_auction_collar_price",
     )
     auction_type: str  # 1 byte
     timestamp: int  # 8 byte
@@ -350,24 +392,3 @@ class AuctionInformation(object):
     collar_reference_price_int: int  # 8 bytes
     lower_auction_collar_price_int: int  # 8 bytes
     upper_auction_collar_price_int: int  # 8 bytes
-
-    def __post_init__(self):
-        Message.__post_init__(self)
-        self.reference_price = (
-            self.reference_price_int / 10**4
-        )
-        self.indicative_clearing_price = (
-            self.indicative_clearing_price_int / 10**4
-        )
-        self.auction_book_clearing_price = (
-            self.auction_book_clearing_price_int / 10**4
-        )
-        self.collar_reference_price = (
-            self.collar_reference_price_int / 10**4
-        )
-        self.lower_auction_collar_price = (
-            self.lower_auction_collar_price_int / 10**4
-        )
-        self.upper_auction_collar_price = (
-            self.upper_auction_collar_price_int / 10**4
-        )
