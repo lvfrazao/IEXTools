@@ -1,6 +1,6 @@
 # IEX_tools
 
-v 0.0.2
+v 0.0.3
 
 This package provides tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/trading/market-data/>
 
@@ -146,6 +146,11 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 - Added context manager and iteration support to `Parser` object
 - Added typing support
 - Added some test coverage (still needs improvement)
+
+### 0.0.3
+
+- Bug fix: Circular import issue with AllMessages from the TypeAliases file
+- Security: Upgraded requests library to 2.20.0 due to vulnerability
 
 ### Future Focus
 
