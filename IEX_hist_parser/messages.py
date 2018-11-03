@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 import struct
 from typing import Dict, Union, Type
 from .IEXHISTExceptions import ProtocolException
-from .TypeAliases import AllMessages
 
 
 # Debating whether this should just be a class variable of SystemEvent. I'm
@@ -392,3 +391,17 @@ class AuctionInformation(Message):
     collar_reference_price_int: int  # 8 bytes
     lower_auction_collar_price_int: int  # 8 bytes
     upper_auction_collar_price_int: int  # 8 bytes
+
+
+AllMessages = Union[
+    ShortSalePriceSale,
+    TradeBreak,
+    AuctionInformation,
+    TradeReport,
+    OfficialPrice,
+    SystemEvent,
+    SecurityDirective,
+    TradingStatus,
+    OperationalHalt,
+    QuoteUpdate,
+]
