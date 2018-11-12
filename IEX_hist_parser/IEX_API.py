@@ -70,7 +70,7 @@ def http_retry(method: Callable) -> Callable:
     return meth_wrapper
 
 
-class IEX_API(object):
+class IEXAPI(object):
     def __init__(self, timeout: int = 5) -> None:
         self.timeout = timeout
         self.BASE = "https://api.iextrading.com/1.0/{}"
