@@ -28,8 +28,8 @@ Purpose: Interact with the IEX web API. All methods return Python dictionaries.
 The web API has a large number of endpoints returning data:
 
 ```Python
->>> from IEXTools import IEX_API
->>> api = IEX_API.IEX_API()
+>>> from IEXTools import IEXAPI
+>>> api = IEXAPI()
 >>> meths = [d for d in dir(api) if not d.startswith('_')]
 >>> for i, j, k in zip(meths[::3], meths[1::3], meths[2::3]):
 ...     print(i.ljust(20), j.ljust(20), k.ljust(20))
@@ -133,10 +133,8 @@ Purpose: Parse the binary PCAP / HIST files offered by IEX.
 To create a Parser object simply supply the file path as an argument.
 
 ```Python
->>> from IEXTools import IEXparser, messages
->>> import IEXparser
->>> import messages
->>> p = IEXparser.Parser(r'IEX TOPS Sample\20180103_IEXTP1_TOPS1.6.pcap')
+>>> from IEXTools import Parser, messages
+>>> p = Parser(r'IEX TOPS Sample\20180103_IEXTP1_TOPS1.6.pcap')
 >>> p
 Parser("IEX TOPS Sample\\20180103_IEXTP1_TOPS1.6.pcap", tops=True, deep=False)
 ```
