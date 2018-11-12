@@ -2,7 +2,7 @@
 
 v 0.0.3
 
-This package provides tools for working with data provided by IEX's REST API and tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/trading/market-data/>
+This package provides tools for working with data provided by IEX's REST API and tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/developer/docs> and <https://iextrading.com/trading/market-data/>
 
 ## Disclaimers
 
@@ -23,7 +23,7 @@ This package aims to provide a variety of tools for working with stock data prov
 
 ### Web API
 
-Purpose: Interact with the IEX web API. All methods return Python dictionaries
+Purpose: Interact with the IEX web API. All methods return Python dictionaries.
 
 The web API has a large number of endpoints returning data:
 
@@ -94,6 +94,8 @@ All symbols available on the API can be retrived using the `symbols` method:
 
 ### Downloader
 
+Purpose: Download IEX's pcap files containing nanosecond precision stock data - the so called HIST files.
+
 The `DataDownloader` class can be instantiated without any arguments by simply calling the class.
 
 ```Python
@@ -125,6 +127,8 @@ Usage:
 ```
 
 ### Parser
+
+Purpose: Parse the binary PCAP / HIST files offered by IEX.
 
 To create a Parser object simply supply the file path as an argument.
 
