@@ -1,8 +1,8 @@
-# IEX_tools
+# IEXTools
 
 v 0.0.3
 
-This package provides tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/trading/market-data/>
+This package provides tools for working with data provided by IEX's REST API and tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/trading/market-data/>
 
 ## Disclaimers
 
@@ -14,22 +14,96 @@ This package is under active development and may be subject to regular breaking 
 
 The Investors Exchange (IEX) was founded in 2012 by Brad Katsuyama to combat the effect that high frequency trading was having on other stock exchanges. The story of IEX was made famous by John Lewis in his book, _Fast Boys_.
 
-This package aims to provide a variety of tools for using the IEX HIST binary data feed files that are freely available through IEX. These files contain nanosecond precision information about stocks such as trades and quotes.
+This package aims to provide a variety of tools for working with stock data provided by IEX such as:
+
+1. The IEX HIST binary data feed files that are freely available through IEX. These files contain nanosecond precision information about stocks such as trades and quotes.
+2. The IEX REST API which provides a huge amount of data such as realtime price information for stocks.
 
 ## Usage
+
+### Web API
+
+Purpose: Interact with the IEX web API. All methods return Python dictionaries
+
+The web API has a large number of endpoints returning data:
+
+```Python
+>>> from IEXTools import IEX_API
+>>> api = IEX_API.IEX_API()
+>>> meths = [d for d in dir(api) if not d.startswith('_')]
+>>> for i, j, k in zip(meths[::3], meths[1::3], meths[2::3]):
+...     print(i.ljust(20), j.ljust(20), k.ljust(20))
+...
+BASE                 batch                book
+chart                collections          company
+crypto               deep                 deep_book
+deep_trades          delayed_quote        dividends
+earnings             earnings_today       effective_spread
+financials           hist                 iex_auction
+iex_corp_actions     iex_dividends        iex_historical
+iex_historical_daily iex_next_day_ex_div  iex_official_price
+iex_short_interest   iex_stats_intraday   iex_stats_recent
+iex_stats_records    iex_symbols          iex_threshold_securities
+largest_trades       last                 logo
+market               news                 ohlc
+operational_halt     peers                previous
+price                quote                relevant
+sector_performance   security_event       short_sale_price_test_status
+splits               stats                stock_list
+symbols              system_event         timeout
+timeseries           today_ipos           tops
+trade_break          trading_status       upcoming_ipos
+```
+
+Users should consult the docstrings of a given function or IEX's docs for additional information on how to use a given endpoint. All endpoints documented in the IEX API docs are implemented in this class.
+
+```Python
+>>> help(api.ohlc)
+Help on method ohlc in module IEX_API:
+
+ohlc(symbol: str) -> dict method of IEX_API.IEX_API instance
+    Returns the open, high, low, and close prices for a given company.
+
+    https://iextrading.com/developer/docs/#ohlc
+
+>>> apple_ohlc = api.ohlc('aapl')
+>>> print(IEX_API.pretty_json(apple_ohlc))
+{
+    "close": {
+        "price": 204.47,
+        "time": 1541797200568
+    },
+    "high": 206.01,
+    "low": 202.25,
+    "open": {
+        "price": 205.55,
+        "time": 1541773800180
+    }
+}
+```
+
+All symbols available on the API can be retrived using the `symbols` method:
+
+```Python
+>>> all_symbols = api.symbols()
+>>> len(all_symbols)
+8756
+>>> api.symbols()[1]
+{'symbol': 'AA', 'name': 'Alcoa Corporation', 'date': '2018-11-09', 'isEnabled': True, 'type': 'cs', 'iexId': '12042'}
+```
 
 ### Downloader
 
 The `DataDownloader` class can be instantiated without any arguments by simply calling the class.
 
 ```Python
-d1 = IEX_hist_parser.DataDownloader()
+d1 = IEXTools.DataDownloader()
 ```
 
 There are three available methods in this class:
 
 ```python
->>> print([method for method in dir(IEX_hist_parser.DataDownloader) if not method.startswith('_')])
+>>> print([method for method in dir(IEXTools.DataDownloader) if not method.startswith('_')])
 
 ['decompress', 'download', 'download_decompressed']
 ```
@@ -38,14 +112,14 @@ There are three available methods in this class:
 - decompress: Unzips the compressed HIST file into a pcap
 - download_decompressed: downloads and decompresses the HIST file - deletes the zipped file at the end
 
-**Warning, IEX HIST files are generally around 500mb compressed >1.5gb uncompressed**
+**Warning, IEX HIST files are generally very large (multiple gbs)**
 
 Usage:
 
 ```Python
->>> import IEX_hist_parser
+>>> import IEXTools
 >>> from datetime import datetime
->>> d1 = IEX_hist_parser.DataDownloader()
+>>> d1 = IEXTools.DataDownloader()
 >>> d1.download_decompressed(datetime(2018, 7, 13), feed_type='tops')
 '20180713_IEXTP1_TOPS1.6.pcap'
 ```
@@ -55,6 +129,7 @@ Usage:
 To create a Parser object simply supply the file path as an argument.
 
 ```Python
+>>> from IEXTools import IEXparser, messages
 >>> import IEXparser
 >>> import messages
 >>> p = IEXparser.Parser(r'IEX TOPS Sample\20180103_IEXTP1_TOPS1.6.pcap')
@@ -110,27 +185,42 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 
 ## External References
 
-- Download page: <https://iextrading.com/trading/market-data/#hist-download>
+- HIST Download page: <https://iextrading.com/trading/market-data/#hist-download>
 - IEX Transport Protocol documentation: <https://iextrading.com/docs/IEX%20Transport%20Specification.pdf>
 - IEX TOPS documentation: <https://iextrading.com/docs/IEX%20TOPS%20Specification.pdf>
+- API docs: <https://iextrading.com/developer/docs/>
 
 ## Discussion
 
 ### Pros
 
+**HIST**
+
 - This is tick by tick historical data offered by IEX for free - other exchanges typically charge large amounts of money for access to similar data
 
+**API**
+
+- The IEX web API provides a vast amount of data and has very high rate limits
+
 ### Cons
+
+**HIST**
 
 - Some people say that the quality of data from IEX may be lower due to the lower volume that they handled when compared to other bigger exchanges (not sure how valid this actually is)
 - Unsure how this data is maintained (if at all)
 - The future availability of this data is not guaranteed, IEX may choose to paywall this data in the future
 - Data is unadjusted so it would need to be manually adjusted in order to use in a backtesting engine
 
+**API**
+
+- It appears that the v1 API will be deprecated in the first half of 2019 and will no longer be offered as a free service
+- There appears to be many inaccuracies in the data (as seen from a review of their issues page on Github)
+
 ### Questions
 
 1. Q: Is the HIST data adjusted for dividends, splits, etc.? If so how often? A: No, HIST data is just a saved version of the live binary trading stream - unadjusted.
 2. Q: Am I required to fill out and submit a Data Agreement prior to accessing the data? A: According to the IEX API maintainers this is not required to access the historical data
+3. Q: Will this data remain free? A: It appears that there are plans for monetizing the web API in 2019 although there will be a free tier plan offered. The fate of the HIST data has not been divulged.
 
 ## Release Notes
 
@@ -151,12 +241,12 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 
 - Bug fix: Circular import issue with AllMessages from the TypeAliases file
 - Security: Upgraded requests library to 2.20.0 due to vulnerability
+- `IEX_API` class: allows the user to access all endpoints of the IEX REST API v1
 
 ### Future Focus
 
 - Need additional tests
 - Review typing functionality
-- Build IEX web API wrapper for real time information on companies
 
 ## Requirements
 
