@@ -15,7 +15,7 @@ from IEXTools import IEXAPI
 
 def is_market_hours():
     """
-    Determin if it is currently regulr mark hours. Some of the test results
+    Determine if it is currently regular mark hours. Some of the test results
     change depending on whether the market is open or not.
 
     This rely's on the system time being in the correct timezone.
