@@ -40,7 +40,7 @@ def http_retry(method: Callable) -> Callable:
     Returns:
         meth_wrapper    : function, the method given wrapped in the retry logic
     """
-    max_tries = 5
+    max_tries = 3
     num_tries = 0
     base_sleep = 2
 
@@ -62,6 +62,7 @@ def http_retry(method: Callable) -> Callable:
                     )
                     sleep(base_sleep ** num_tries)
                 else:
+                    num_tries = 0
                     raise
             else:
                 num_tries = 0
@@ -103,7 +104,7 @@ class IEXAPI(object):
             "iex short interest": "stock/{}/short-interest",
             "key stats": "stock/{}/stats",
             "largest trades": "stock/{}/largest-trades",
-            "list most active": "/stock/market/list/mostactive",
+            "list mostactive": "/stock/market/list/mostactive",
             "list gainers": "/stock/market/list/gainers",
             "list losers": "/stock/market/list/losers",
             "list iexvolume": "/stock/market/list/iexvolume",
@@ -144,7 +145,7 @@ class IEXAPI(object):
             "iex stats recent": "stats/recent",
             "iex stats records": "stats/records",
             "iex historical": "stats/historical",
-            "iex historial daily": "stats/historical/daily",
+            "iex historical daily": "stats/historical/daily",
             "market": "market",
         }
 
@@ -188,7 +189,7 @@ class IEXAPI(object):
     ) -> Optional[str]:
         if data is None:
             return None
-        if isinstance(data, str):
+        if isinstance(data, str) or isinstance(data, int):
             return data
         return ",".join(data)
 
@@ -455,7 +456,7 @@ class IEXAPI(object):
         https://iextrading.com/developer/docs/#list
         """
         valid_lists = [
-            "most active",
+            "mostactive",
             "gainers",
             "losers",
             "iexvolume",
