@@ -19,6 +19,19 @@ This package aims to provide a variety of tools for working with stock data prov
 1. The IEX HIST binary data feed files that are freely available through IEX. These files contain nanosecond precision information about stocks such as trades and quotes.
 2. The IEX REST API which provides a huge amount of data such as realtime price information for stocks.
 
+## Installation
+
+Navigate to the folder containing the README.md file and run the pip command to install the package:
+
+```shell
+$ pip install .
+```
+
+### Requirements
+
+- Python 3.7 or greater
+- requests
+
 ## Usage
 
 ### Web API
