@@ -40,7 +40,7 @@ from datetime import datetime, timezone
 from . import messages
 from typing import BinaryIO, Optional, Iterator, Union, List, Tuple, Dict
 from .IEXHISTExceptions import ProtocolException
-from .TypeAliases import AllMessages
+from .messages import AllMessages
 
 
 class Parser(object):

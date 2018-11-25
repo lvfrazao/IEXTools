@@ -9,13 +9,13 @@ from setuptools import find_packages, setup, Command
 # Kenneth Reitz
 
 # Package meta-data.
-NAME = 'IEX_hist_parser'
-DESCRIPTION = 'Package for handling IEX binary market data',
-URL = 'https://github.com/vfrazao-ns1/IEX_hist_parser'
+NAME = 'IEXTools'
+DESCRIPTION = 'Package for handling IEX stock market data',
+URL = 'https://github.com/vfrazao-ns1/IEXTools'
 EMAIL = ''
 AUTHOR = 'Victor Frazao'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = ['requests']

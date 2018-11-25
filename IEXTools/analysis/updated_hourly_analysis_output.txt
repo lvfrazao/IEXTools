@@ -1,0 +1,113 @@
+Processed 0 messages - cur datetime = 2018-11-01 11:27:37.187191+00:00
+Processed 1,000,000 messages - cur datetime = 2018-11-01 13:36:29.101385+00:00
+Processed 2,000,000 messages - cur datetime = 2018-11-01 13:42:56.222425+00:00
+Processed 3,000,000 messages - cur datetime = 2018-11-01 13:48:45.025002+00:00
+Processed 4,000,000 messages - cur datetime = 2018-11-01 13:53:06.778289+00:00
+Processed 5,000,000 messages - cur datetime = 2018-11-01 13:58:52.636241+00:00
+Processed 6,000,000 messages - cur datetime = 2018-11-01 14:03:50.025253+00:00
+Processed 7,000,000 messages - cur datetime = 2018-11-01 14:08:52.266296+00:00
+Processed 8,000,000 messages - cur datetime = 2018-11-01 14:12:04.743005+00:00
+Processed 9,000,000 messages - cur datetime = 2018-11-01 14:16:53.314572+00:00
+Processed 10,000,000 messages - cur datetime = 2018-11-01 14:22:03.920643+00:00
+Processed 11,000,000 messages - cur datetime = 2018-11-01 14:27:44.775248+00:00
+Processed 12,000,000 messages - cur datetime = 2018-11-01 14:33:32.226009+00:00
+Processed 13,000,000 messages - cur datetime = 2018-11-01 14:38:39.027923+00:00
+Processed 14,000,000 messages - cur datetime = 2018-11-01 14:44:51.121693+00:00
+Processed 15,000,000 messages - cur datetime = 2018-11-01 14:51:02.637115+00:00
+Processed 16,000,000 messages - cur datetime = 2018-11-01 14:57:52.906852+00:00
+Processed 17,000,000 messages - cur datetime = 2018-11-01 15:03:40.723558+00:00
+Processed 18,000,000 messages - cur datetime = 2018-11-01 15:09:10.691027+00:00
+Processed 19,000,000 messages - cur datetime = 2018-11-01 15:14:32.022684+00:00
+Processed 20,000,000 messages - cur datetime = 2018-11-01 15:21:11.308033+00:00
+Processed 21,000,000 messages - cur datetime = 2018-11-01 15:27:58.756830+00:00
+Processed 22,000,000 messages - cur datetime = 2018-11-01 15:34:32.038109+00:00
+Processed 23,000,000 messages - cur datetime = 2018-11-01 15:41:59.666851+00:00
+Processed 24,000,000 messages - cur datetime = 2018-11-01 15:48:17.654893+00:00
+Processed 25,000,000 messages - cur datetime = 2018-11-01 15:55:05.611949+00:00
+Processed 26,000,000 messages - cur datetime = 2018-11-01 16:02:09.866907+00:00
+Processed 27,000,000 messages - cur datetime = 2018-11-01 16:10:34.770278+00:00
+Processed 28,000,000 messages - cur datetime = 2018-11-01 16:18:35.271233+00:00
+Processed 29,000,000 messages - cur datetime = 2018-11-01 16:27:26.093942+00:00
+Processed 30,000,000 messages - cur datetime = 2018-11-01 16:36:00.253448+00:00
+Processed 31,000,000 messages - cur datetime = 2018-11-01 16:45:43.670628+00:00
+Processed 32,000,000 messages - cur datetime = 2018-11-01 16:56:30.290952+00:00
+Processed 33,000,000 messages - cur datetime = 2018-11-01 17:06:15.707922+00:00
+Processed 34,000,000 messages - cur datetime = 2018-11-01 17:16:19.635078+00:00
+Processed 35,000,000 messages - cur datetime = 2018-11-01 17:27:23.423510+00:00
+Processed 36,000,000 messages - cur datetime = 2018-11-01 17:38:22.517937+00:00
+Processed 37,000,000 messages - cur datetime = 2018-11-01 17:48:00.263002+00:00
+Processed 38,000,000 messages - cur datetime = 2018-11-01 17:57:39.872990+00:00
+Processed 39,000,000 messages - cur datetime = 2018-11-01 18:07:12.481480+00:00
+Processed 40,000,000 messages - cur datetime = 2018-11-01 18:18:14.008338+00:00
+Processed 41,000,000 messages - cur datetime = 2018-11-01 18:29:56.151187+00:00
+Processed 42,000,000 messages - cur datetime = 2018-11-01 18:39:13.090479+00:00
+Processed 43,000,000 messages - cur datetime = 2018-11-01 18:49:52.273989+00:00
+Processed 44,000,000 messages - cur datetime = 2018-11-01 19:01:00.757886+00:00
+Processed 45,000,000 messages - cur datetime = 2018-11-01 19:11:03.027203+00:00
+Processed 46,000,000 messages - cur datetime = 2018-11-01 19:20:49.334707+00:00
+Processed 47,000,000 messages - cur datetime = 2018-11-01 19:30:26.965661+00:00
+Processed 48,000,000 messages - cur datetime = 2018-11-01 19:39:13.773597+00:00
+Processed 49,000,000 messages - cur datetime = 2018-11-01 19:45:56.968984+00:00
+Processed 50,000,000 messages - cur datetime = 2018-11-01 19:52:10.907618+00:00
+Processed 51,000,000 messages - cur datetime = 2018-11-01 19:56:58.077005+00:00
+Parsed 51,926,646 messages in 3,660 s-- 14,186 msgs per second -- 2.09 mb/s
+Min Datetime = 2018-11-01 11:27:37.187191+00:00, Max Datetime = 2018-11-01 21:10:00.010535+00:00 -- 1,486 msgs/s
+11 to 12
+|ShortSalePriceSale.......|................8840| 0.0%|
+|TradingStatus............|................8714| 0.0%|
+|OperationalHalt..........|................8707| 0.0%|
+|QuoteUpdate..............|................8707| 0.0%|
+|SecurityDirective........|...................4| 0.0%|
+|SystemEvent..............|...................1| 0.0%|
+12 to 13
+|QuoteUpdate..............|...............69065| 0.1%|
+|TradeReport..............|..................96| 0.0%|
+|SystemEvent..............|...................1| 0.0%|
+13 to 14
+|QuoteUpdate..............|.............4901515| 9.4%|
+|TradeReport..............|..............144404| 0.3%|
+|AuctionInformation.......|.................478| 0.0%|
+|ShortSalePriceSale.......|..................46| 0.0%|
+|TradingStatus............|...................9| 0.0%|
+|OfficialPrice............|...................4| 0.0%|
+|SystemEvent..............|...................1| 0.0%|
+14 to 15
+|QuoteUpdate..............|............10869580|20.9%|
+|TradeReport..............|..............277446| 0.5%|
+|TradingStatus............|..................21| 0.0%|
+|ShortSalePriceSale.......|..................18| 0.0%|
+15 to 16
+|QuoteUpdate..............|.............9128951|17.6%|
+|TradeReport..............|..............249318| 0.5%|
+|TradingStatus............|..................11| 0.0%|
+|ShortSalePriceSale.......|..................10| 0.0%|
+16 to 17
+|QuoteUpdate..............|.............6482387|12.5%|
+|TradeReport..............|..............196491| 0.4%|
+|ShortSalePriceSale.......|...................9| 0.0%|
+|TradingStatus............|...................2| 0.0%|
+17 to 18
+|QuoteUpdate..............|.............5663461|10.9%|
+|TradeReport..............|..............193595| 0.4%|
+|ShortSalePriceSale.......|...................5| 0.0%|
+|TradingStatus............|...................1| 0.0%|
+18 to 19
+|QuoteUpdate..............|.............5459169|10.5%|
+|TradeReport..............|..............224409| 0.4%|
+|ShortSalePriceSale.......|...................2| 0.0%|
+19 to 20
+|QuoteUpdate..............|.............7479049|14.4%|
+|TradeReport..............|..............513940| 1.0%|
+|AuctionInformation.......|................2392| 0.0%|
+|ShortSalePriceSale.......|...................8| 0.0%|
+|TradingStatus............|...................6| 0.0%|
+20 to 21
+|QuoteUpdate..............|...............35574| 0.1%|
+|TradeReport..............|.................168| 0.0%|
+|TradingStatus............|...................8| 0.0%|
+|OfficialPrice............|...................4| 0.0%|
+|SystemEvent..............|...................1| 0.0%|
+|ShortSalePriceSale.......|...................1| 0.0%|
+21 to 22
+|SystemEvent..............|...................2| 0.0%|
+|QuoteUpdate..............|..................15| 0.0%|
