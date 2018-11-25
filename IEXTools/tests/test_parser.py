@@ -1,19 +1,28 @@
+"""
+Unittests for the parser class.
+
+To run unittest you must use the unittest module's cli due to Python's import
+system:
+
+Go into the top level directory and run the command:
+py -m unittest IEXTools.tests.test_parser
+"""
 import os
 import sys
 import unittest
-import IEX_hist_parser.IEXparser as iex
+from IEXTools import IEXparser as iex
 
-if sys.argv[0]:
-    os.chdir(os.path.dirname(sys.argv[0]))
+
+file_path = "IEXTools\\tests\\input_files\\example1.pcap"
 
 
 class ParserTestCases(unittest.TestCase):
     """
-    Tests for parser.py
+    Tests for IEXparser.py
     """
 
     def setUp(self):
-        self.test_file = "input_files\\example1.pcap"
+        self.test_file = file_path
         self.p = iex.Parser(self.test_file)
 
     def tearDown(self):
@@ -36,7 +45,7 @@ class ParserTestCases(unittest.TestCase):
         self.assertEqual(self.p.bytes_read, 1930)
 
     def test_end_to_end(self):
-        test_file = "input_files\\example1.pcap"
+        test_file = file_path
         with iex.Parser(test_file) as p:
             for message in p:
                 pass
