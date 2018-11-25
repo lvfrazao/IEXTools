@@ -21,6 +21,16 @@ This package aims to provide a variety of tools for working with stock data prov
 
 ## Installation
 
+**Note: both of these installation methods will fail without Python 3.7 or greater.**
+
+Install from PyPI:
+
+```shell
+$ py -m pip install IEXTools
+```
+
+OR
+
 Navigate to the folder containing the README.md file and run the pip command to install the package:
 
 ```shell
