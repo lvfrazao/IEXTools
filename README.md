@@ -266,7 +266,8 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 
 - Bug fix: Circular import issue with AllMessages from the TypeAliases file
 - Security: Upgraded requests library to 2.20.0 due to vulnerability
-- `IEX_API` class: allows the user to access all endpoints of the IEX REST API v1
+- `IEXAPI` class: allows the user to access all endpoints of the IEX REST API v1
+- Added tests for the `IEXAPI` class
 
 ### Future Focus
 
