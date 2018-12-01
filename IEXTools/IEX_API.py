@@ -1,19 +1,19 @@
 """
-This module defines the IEX_API class which acts as an abstraction to the IEX
+This module defines the IEXAPI class which acts as an abstraction to the IEX
 REST API.
 
-The IEX_API attempts to implement every endpoint available on the public API.
+The IEXAPI attempts to implement every endpoint available on the public API.
 
 All functions of this client that calls out to the IEX API must follow the same
 design pattern:
     1) Perform error checking on inputs given (e.g., if expecting certain
        arguments)
-    2) Retrieve the required endpoint by calling the _get_endpoint method
+    2) Retrieve the required endpoint by calling the `_get_endpoint` method
     3) Build the parameters to be used by the function
-    4) Route all calls to the IEX API through the _request method
+    4) Route all calls to the IEX API through the `_request` method
 
 Any new endpoints should subsequently be registered in the endpoints variable
-of the _get_endpoint method.
+of the `_get_endpoint` method.
 
 #TODO make async implementation of API client
 """
