@@ -34,9 +34,14 @@ trading_status_messages = {
     "T": "Trading on IEX",
 }
 
+"""
+Trade report (0x54) has 4 extra bytes on end (no meaning)
+Trade break (0x42) has 4 extra bytes
+"""
+
 
 class MessageDecoder(object):
-    def __init__(self) -> None:
+    def __init__(self, version: float = 1.6) -> None:
         """
         Some notes on data types used in decoding IEX messages:
         B: unsigned byte
@@ -45,70 +50,91 @@ class MessageDecoder(object):
         s: string (size denoted by preceding number)
         q: signed long long (8 bytes)
         """
-        self.message_types: Dict[bytes, Dict[str, Union[str, AllMessages]]] = {
-            b"\x53": {
-                "str": "System Event Message",
-                "cls": SystemEvent,
-                "fmt": "<Bq",
+        self.message_types: Dict[
+            float, Dict[bytes, Dict[str, Union[str, AllMessages]]]
+        ] = {
+            1.6: {
+                b"\x53": {
+                    "str": "System Event Message",
+                    "cls": SystemEvent,
+                    "fmt": "<Bq",
+                },
+                b"\x44": {
+                    "str": "Security Directory Message",
+                    "cls": SecurityDirective,
+                    "fmt": "<Bq8sLqB",
+                },
+                b"\x48": {
+                    "str": "Trading Status Message",
+                    "cls": TradingStatus,
+                    "fmt": "<1sq8s4s",
+                },
+                b"\x4f": {
+                    "str": "Operational Halt Status Message",
+                    "cls": OperationalHalt,
+                    "fmt": "<1sq8s",
+                },
+                b"\x50": {
+                    "str": "Short Sale Price Test Status Message",
+                    "cls": ShortSalePriceSale,
+                    "fmt": "<Bq8s1s",
+                },
+                b"\x51": {
+                    "str": "Quote Update Message",
+                    "cls": QuoteUpdate,
+                    "fmt": "<Bq8sLqqL",
+                },
+                b"\x54": {
+                    "str": "Trade Report Message",
+                    "cls": TradeReport,
+                    "fmt": "<Bq8sLqq",
+                },
+                b"\x58": {
+                    "str": "Official Price Message",
+                    "cls": OfficialPrice,
+                    "fmt": "<1sq8sq",
+                },
+                b"\x42": {
+                    "str": "Trade Break Message",
+                    "cls": TradeBreak,
+                    "fmt": "<1sq8sqq",
+                },
+                b"\x41": {
+                    "str": "Auction Information Message",
+                    "cls": AuctionInformation,
+                    "fmt": "<1sq8sLqqL1sBLqqqq",
+                },
             },
-            b"\x44": {
-                "str": "Security Directory Message",
-                "cls": SecurityDirective,
-                "fmt": "<Bq8sLqB",
-            },
-            b"\x48": {
-                "str": "Trading Status Message",
-                "cls": TradingStatus,
-                "fmt": "<1sq8s4s",
-            },
-            b"\x4f": {
-                "str": "Operational Halt Status Message",
-                "cls": OperationalHalt,
-                "fmt": "<1sq8s",
-            },
-            b"\x50": {
-                "str": "Short Sale Price Test Status Message",
-                "cls": ShortSalePriceSale,
-                "fmt": "<Bq8s1s",
-            },
-            b"\x51": {
-                "str": "Quote Update Message",
-                "cls": QuoteUpdate,
-                "fmt": "<Bq8sLqqL",
-            },
-            b"\x54": {
-                "str": "Trade Report Message",
-                "cls": TradeReport,
-                "fmt": "<Bq8sLqq",
-            },
-            b"\x58": {
-                "str": "Official Price Message",
-                "cls": OfficialPrice,
-                "fmt": "<1sq8sq",
-            },
-            b"\x42": {
-                "str": "Trade Break Message",
-                "cls": TradeBreak,
-                "fmt": "<1sq8sqq",
-            },
-            b"\x41": {
-                "str": "Auction Information Message",
-                "cls": AuctionInformation,
-                "fmt": "<1sq8sLqqL1sBLqqqq",
+            1.5: {
+                b"\x51": {
+                    "str": "Quote Update Message",
+                    "cls": QuoteUpdate,
+                    "fmt": "<Bq8sLqqL",
+                },
+                b"\x54": {
+                    "str": "Trade Report Message",
+                    "cls": TradeReport,
+                    "fmt": "<Bq8sLqqxxxx",
+                },
+                b"\x42": {
+                    "str": "Trade Break Message",
+                    "cls": TradeBreak,
+                    "fmt": "<1sq8sqqxxxx",
+                },
             },
         }
         self.DECODE_FMT: Dict[int, str] = {
-            msg[0]: self.message_types[msg]["fmt"] for msg in self.message_types
+            msg[0]: self.message_types[version][msg]["fmt"] for msg in self.message_types[version]
         }
         self.MSG_CLS: Dict[int, Type[AllMessages]] = {
-            msg[0]: self.message_types[msg]["cls"] for msg in self.message_types
+            msg[0]: self.message_types[version][msg]["cls"] for msg in self.message_types[version]
         }
 
     def decode_message(self, msg_type: int, binary_msg: bytes) -> AllMessages:
         try:
             fmt = self.DECODE_FMT[msg_type]
         except KeyError as e:
-            raise ProtocolException(f'Unknown message type: {e.args}')
+            raise ProtocolException(f"Unknown message type: {e.args}")
         decoded_msg = struct.unpack(fmt, binary_msg)
         msg = self.MSG_CLS[msg_type](*decoded_msg)
         return msg
@@ -134,11 +160,7 @@ class Message(object):
         for attrib in str_fields:
             if hasattr(self, attrib):
                 if isinstance(getattr(self, attrib), bytes):
-                    setattr(
-                        self,
-                        attrib,
-                        getattr(self, attrib).decode("utf-8").strip(),
-                    )
+                    setattr(self, attrib, getattr(self, attrib).decode("utf-8").strip())
 
         int_prices = [p for p in self.__slots__ if "price" in p and "int" in p]
 
@@ -212,13 +234,7 @@ class TradingStatus(Message):
         o MCB2: Market-Wide Circuit Breaker Level 2 Breached
     """
 
-    __slots__ = (
-        "status",
-        "timestamp",
-        "symbol",
-        "reason",
-        "trading_status_message",
-    )
+    __slots__ = ("status", "timestamp", "symbol", "reason", "trading_status_message")
     status: str  # 1 byte
     timestamp: int  # 8 bytes, nanosecond epoch time
     symbol: str  # 8 bytes
@@ -288,6 +304,31 @@ class QuoteUpdate(Message):
 
 @dataclass
 class TradeReport(Message):
+    """
+    From the TOPS specification document: "Trade Report Messages are sent when
+    an order on the IEX Order Book is executed in whole or in part. TOPS sends
+    a Trade Report Message for every individual fill."
+    """
+
+    __slots__ = (
+        "flags",
+        "timestamp",
+        "symbol",
+        "size",
+        "price_int",
+        "trade_id",
+        "price",
+    )
+    flags: int  # 1 byte
+    timestamp: int  # 8 bytes
+    symbol: str  # 8 bytes
+    size: int  # 4 bytes - Trade volume
+    price_int: int  # 8 bytes - Trade price
+    trade_id: int  # 8 bytes - Trade ID, unique within the day
+
+
+@dataclass
+class TradeReport15(Message):
     """
     From the TOPS specification document: "Trade Report Messages are sent when
     an order on the IEX Order Book is executed in whole or in part. TOPS sends
