@@ -53,17 +53,24 @@ class Parser(object):
     """
 
     def __init__(
-        self, file_path: str, tops: bool = True, deep: bool = False
+        self, file_path: str, tops: bool = True, deep: bool = False, tops_version: float = 1.6
     ) -> None:
         self.file_path = file_path
         self.tops = tops
         self.deep = deep
         self.file = self._load(file_path)
         # IEX TP Header Structure
+        # Many of these byte strings are hardcoded and may cause compatibility
+        # issues with future or previous versions of TOPS, DEEP, or the EIX
+        # Transport Protocol
         self.version = b"\x01"
         self.reserved = b"\x00"
         if tops and not deep:
-            self.protocol_id = b"\x03\x80"
+            protcol_ids = {
+                1.5: b"\x02\x80",
+                1.6: b"\x03\x80",
+            }
+            self.protocol_id = protcol_ids[tops_version]
         elif deep:
             self.protocol_id = b"\x04\x80"
             raise NotImplementedError("Parsing of DEEP files not implemented")
@@ -94,7 +101,7 @@ class Parser(object):
             messages.QuoteUpdate: b"\x51",
         }
 
-        self.decoder = messages.MessageDecoder()
+        self.decoder = messages.MessageDecoder(version=tops_version)
 
     def __repr__(self) -> str:
         return f'Parser("{self.file_path}", tops={self.tops}, deep={self.deep})'

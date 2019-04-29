@@ -1,6 +1,6 @@
 # IEXTools
 
-v 0.0.4
+v 0.0.5
 
 This package provides tools for working with data provided by IEX's REST API and tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/developer/docs> and <https://iextrading.com/trading/market-data/>
 
@@ -14,7 +14,7 @@ This package is under active development and may be subject to regular breaking 
 
 ## Executive Summary
 
-The Investors Exchange (IEX) was founded in 2012 by Brad Katsuyama to combat the effect that high frequency trading was having on other stock exchanges. The story of IEX was made famous by John Lewis in his book, _Fast Boys_.
+The Investors Exchange (IEX) was founded in 2012 by Brad Katsuyama to combat the effect that high frequency trading was having on other stock exchanges. The story of IEX was made famous by Michael Lewis in his book, _Fast Boys_.
 
 This package aims to provide a variety of tools for working with stock data provided by IEX such as:
 
@@ -155,7 +155,7 @@ Usage:
 
 Purpose: Parse the binary PCAP / HIST files offered by IEX.
 
-To create a Parser object simply supply the file path as an argument.
+To create a Parser object simply supply the file path as an argument. Please note that if using a version 1.5 TOPS file then the `tops_version` parameter must be set to `1.5` on instantiation.
 
 ```Python
 >>> from IEXTools import Parser, messages
@@ -274,6 +274,11 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 ### 0.0.4
 
 - Added documentation (via Sphinx)
+
+### 0.0.5
+
+- Added support for version 1.5 TOPS files
+- Updated urllib3 version in requirements.txt due to vulnerability
 
 ### Future Focus
 
