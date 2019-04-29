@@ -34,11 +34,6 @@ trading_status_messages = {
     "T": "Trading on IEX",
 }
 
-"""
-Trade report (0x54) has 4 extra bytes on end (no meaning)
-Trade break (0x42) has 4 extra bytes
-"""
-
 
 class MessageDecoder(object):
     def __init__(self, version: float = 1.6) -> None:
@@ -304,31 +299,6 @@ class QuoteUpdate(Message):
 
 @dataclass
 class TradeReport(Message):
-    """
-    From the TOPS specification document: "Trade Report Messages are sent when
-    an order on the IEX Order Book is executed in whole or in part. TOPS sends
-    a Trade Report Message for every individual fill."
-    """
-
-    __slots__ = (
-        "flags",
-        "timestamp",
-        "symbol",
-        "size",
-        "price_int",
-        "trade_id",
-        "price",
-    )
-    flags: int  # 1 byte
-    timestamp: int  # 8 bytes
-    symbol: str  # 8 bytes
-    size: int  # 4 bytes - Trade volume
-    price_int: int  # 8 bytes - Trade price
-    trade_id: int  # 8 bytes - Trade ID, unique within the day
-
-
-@dataclass
-class TradeReport15(Message):
     """
     From the TOPS specification document: "Trade Report Messages are sent when
     an order on the IEX Order Book is executed in whole or in part. TOPS sends
