@@ -53,7 +53,11 @@ class Parser(object):
     """
 
     def __init__(
-        self, file_path: str, tops: bool = True, deep: bool = False, tops_version: float = 1.6
+        self,
+        file_path: str,
+        tops: bool = True,
+        deep: bool = False,
+        tops_version: float = 1.6,
     ) -> None:
         self.file_path = file_path
         self.tops = tops
@@ -66,10 +70,7 @@ class Parser(object):
         self.version = b"\x01"
         self.reserved = b"\x00"
         if tops and not deep:
-            protcol_ids = {
-                1.5: b"\x02\x80",
-                1.6: b"\x03\x80",
-            }
+            protcol_ids = {1.5: b"\x02\x80", 1.6: b"\x03\x80"}
             self.protocol_id = protcol_ids[tops_version]
         elif deep:
             self.protocol_id = b"\x04\x80"
@@ -151,19 +152,14 @@ class Parser(object):
             return self.session_id
         except AttributeError:
             iex_header_start = (
-                self.version
-                + self.reserved
-                + self.protocol_id
-                + self.channel_id
+                self.version + self.reserved + self.protocol_id + self.channel_id
             )
             with open(file_path, "rb") as market_file:
                 for line in market_file:
                     if iex_header_start in line:
                         line = line.split(iex_header_start)[1]
                         return line[:4]
-        raise ProtocolException(
-            "Session ID could not be found in the supplied file"
-        )
+        raise ProtocolException("Session ID could not be found in the supplied file")
 
     def read_next_line(self) -> bytes:
         """
@@ -234,8 +230,7 @@ class Parser(object):
         )
 
     def get_next_message(
-        self,
-        allowed: Optional[Union[List[AllMessages], Tuple[AllMessages]]] = None,
+        self, allowed: Optional[Union[List[AllMessages], Tuple[AllMessages]]] = None
     ) -> AllMessages:
         """
         Returns the next message in the pcap file. The user may optionally
