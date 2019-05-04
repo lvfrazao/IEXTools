@@ -1,5 +1,6 @@
 # Folder containing large examples of IEX pcap files
 IEX TOPS Sample/
+IEXTools/debug/
 .vscode/
 
 # Boilerplate:
