@@ -92,7 +92,7 @@ class MessageDecoder(object):
                 b"\x42": {
                     "str": "Trade Break Message",
                     "cls": TradeBreak,
-                    "fmt": "<1sq8sqq",
+                    "fmt": "<1sq8sLqq",
                 },
                 b"\x41": {
                     "str": "Auction Information Message",
@@ -345,10 +345,11 @@ class TradeBreak(Message):
     rare and only affect applications that rely upon IEX execution based data."
     """
 
-    __slots__ = ("price_type", "timestamp", "symbol", "price_int", "price")
-    price_type: str  # 1 byte
+    __slots__ = ("sale_flags", "timestamp", "symbol", "size", "price_int", "price", "trade_id")
+    sale_flags: str  # 1 byte
     timestamp: int  # 8 byte
     symbol: str  # 8 bytes
+    size: int  # 4 bytes
     price_int: int  # 8 bytes
     trade_id: int  # 8 bytes
 
