@@ -155,10 +155,19 @@ class Parser(object):
                 self.version + self.reserved + self.protocol_id + self.channel_id
             )
             with open(file_path, "rb") as market_file:
-                for line in market_file:
-                    if iex_header_start in line:
-                        line = line.split(iex_header_start)[1]
-                        return line[:4]
+                found = False
+                i = 0
+                while not found:
+                    cur_chunk = market_file.read(1)
+                    if cur_chunk[0] == iex_header_start[i]:
+                        i += 1
+                        if i == len(iex_header_start):
+                            found = True
+                    else:
+                        i = 0
+
+                if found:
+                    return market_file.read(4)
         raise ProtocolException("Session ID could not be found in the supplied file")
 
     def read_next_line(self) -> bytes:
