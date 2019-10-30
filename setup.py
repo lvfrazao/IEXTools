@@ -15,7 +15,7 @@ URL = 'https://github.com/vfrazao-ns1/IEXTools'
 EMAIL = ''
 AUTHOR = 'Victor Frazao'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '0.0.6'
+VERSION = '0.0.7'
 
 # What packages are required for this module to be executed?
 REQUIRED = ['requests']
