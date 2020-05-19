@@ -17,19 +17,19 @@ from typing import Dict
 
 
 class DataDownloader(object):
-    def __init__(self) -> None:
+    def __init__(self, path: str = None) -> None:
         """
         Initiate the class with the IEX API endpoint information and
         initializes the folder to put the downloaded data into.
         """
         self.base_endpoint = "https://api.iextrading.com/1.0/"
 
-        if sys.argv[0]:
-            os.chdir(os.path.dirname(sys.argv[0]))
-
-        self.directory = "IEX_data"
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
+        if path:
+            self.directory = path
+        else:
+            self.directory = "IEX_data"
+            if not os.path.exists(self.directory):
+                os.makedirs(self.directory)
 
     def _get_endpoint(self, date: datetime) -> str:
         """
