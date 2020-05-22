@@ -35,8 +35,9 @@ Parsed 1,000,000 messages in 54.0 seconds -- 18512.9 messages per second
 '''
 """
 from __future__ import annotations
-import struct
 from datetime import datetime, timezone
+import gzip
+import struct
 from . import messages
 from typing import BinaryIO, Optional, Iterator, Union, List, Tuple, Dict
 from .IEXHISTExceptions import ProtocolException
@@ -133,7 +134,10 @@ class Parser(object):
         Function to load a TOPS File into the parser. Simply returns a file
         object which other methods will iterate over.
         """
-        return open(file_path, "rb")
+        if file_path.endswith('.gz'):
+            return gzip.open(file_path, "rb")
+        else:
+            return open(file_path, "rb")
 
     def _get_session_id(self, file_path: str) -> bytes:
         """
@@ -154,7 +158,7 @@ class Parser(object):
             iex_header_start = (
                 self.version + self.reserved + self.protocol_id + self.channel_id
             )
-            with open(file_path, "rb") as market_file:
+            with self._load(file_path) as market_file:
                 found = False
                 i = 0
                 while not found:
