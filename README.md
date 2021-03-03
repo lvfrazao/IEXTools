@@ -288,6 +288,12 @@ By not specifying the `allowed` argument the parser returns 1,000,000 parsed mes
 
 - Fixed bug raised in issue #9
 
+### 0.0.8
+
+- Changes in https://github.com/vfrazao-ns1/IEXTools/pull/13
+- Make download path configurable
+- Decompress .gz files on the fly
+
 ### Future Focus
 
 - Additional testing
