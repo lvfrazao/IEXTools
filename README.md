@@ -1,6 +1,6 @@
 # IEXTools
 
-v 0.0.7
+v 0.0.8
 
 This package provides tools for working with data provided by IEX's REST API and tools to decode and use IEX's binary market data (dubbed "HIST"). For more information on the type of data offered by IEX please visit their website: <https://iextrading.com/developer/docs> and <https://iextrading.com/trading/market-data/>
 
