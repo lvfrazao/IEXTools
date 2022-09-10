@@ -48,6 +48,68 @@ class MessageDecoder(object):
         self.message_types: Dict[
             float, Dict[bytes, Dict[str, Union[str, AllMessages]]]
         ] = {
+            1.0:{
+                b"\x53": {
+                    "str": "System Event Message",
+                    "cls": SystemEvent,
+                    "fmt": "<Bq",
+                },
+                b"\x44": {
+                    "str": "Security Directory Message",
+                    "cls": SecurityDirective,
+                    "fmt": "<Bq8sLqB",
+                },
+                b"\x48": {
+                    "str": "Trading Status Message",
+                    "cls": TradingStatus,
+                    "fmt": "<1sq8s4s",
+                },
+                b"\x4f": {
+                    "str": "Operational Halt Status Message",
+                    "cls": OperationalHalt,
+                    "fmt": "<1sq8s",
+                },
+                b"\x50": {
+                    "str": "Short Sale Price Test Status Message",
+                    "cls": ShortSalePriceSale,
+                    "fmt": "<Bq8s1s",
+                },
+                b'\x45': {
+                    "str": "Security Event Message",
+                    "cls": SecurityEvent,
+                    "fmt": "<Bq8s"
+                },
+                b'\x38':{
+                    "str": "Bid Price Level Update Message",
+                    "cls": BidPriceLevelUpdate,
+                    "fmt": "<Bq8slq"
+                },
+                b'\x35':{
+                    "str": "Ask Price Level Updte Message",
+                    "cls": AskPriceLevelUpdate,
+                    "fmt": "<Bq8slq"
+                },
+                b"\x54": {
+                    "str": "Trade Report Message",
+                    "cls": TradeReport,
+                    "fmt": "<Bq8sLqq",
+                },
+                b"\x58": {
+                    "str": "Official Price Message",
+                    "cls": OfficialPrice,
+                    "fmt": "<1sq8sq",
+                },
+                b"\x42": {
+                    "str": "Trade Break Message",
+                    "cls": TradeBreak,
+                    "fmt": "<1sq8sLqq",
+                },
+                b"\x41": {
+                    "str": "Auction Information Message",
+                    "cls": AuctionInformation,
+                    "fmt": "<1sq8sLqqL1sBLqqqq",
+                },
+            },
             1.6: {
                 b"\x53": {
                     "str": "System Event Message",
@@ -272,6 +334,51 @@ class ShortSalePriceSale(Message):
 
 
 @dataclass
+class SecurityEvent(Message):
+    '''
+    From the DEEP specification document: "The Security Event Message is used
+    to indicate events that apply to a security. A Security Event Message will
+    be sent whenever such event occurs for a security"
+    '''
+    
+    __slots__ = ('security_event','timestamp','symbol')
+    security_event: int #1 byte
+    timestamp: int #8 bytes
+    symbol: int #8 bytes
+    
+@dataclass
+class BidPriceLevelUpdate(Message):
+    '''
+    From the DEEP specificaton document: "DEEP broadcasts a real-time Price 
+    Level Update Message each time a displayed price level on IEX is updated 
+    during the trading day. When a price level is removed, IEX will disseminate
+    a size of zero (i.e., 0x0) for the level"
+    '''
+    
+    __slots__ = ('event_flags','timestamp','symbol','size','price_int','price')
+    event_flags: int
+    timestamp: int
+    symbol: str
+    size: int
+    price_int: int
+    
+@dataclass
+class AskPriceLevelUpdate(Message):
+    '''
+    From the DEEP specificaton document: "DEEP broadcasts a real-time Price 
+    Level Update Message each time a displayed price level on IEX is updated 
+    during the trading day. When a price level is removed, IEX will disseminate
+    a size of zero (i.e., 0x0) for the level"
+    '''
+    
+    __slots__ = ('event_flags','timestamp','symbol','size','price_int','price')
+    event_flags: int
+    timestamp: int
+    symbol: str
+    size: int
+    price_int: int
+
+@dataclass
 class QuoteUpdate(Message):
     """
     From the TOPS specification document: "TOPS broadcasts a real-time Quote
@@ -426,4 +533,7 @@ AllMessages = Union[
     TradingStatus,
     OperationalHalt,
     QuoteUpdate,
+    SecurityEvent,
+    BidPriceLevelUpdate,
+    AskPriceLevelUpdate
 ]

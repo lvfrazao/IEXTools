@@ -108,6 +108,9 @@ class Parser(object):
             messages.TradingStatus: b"\x48",
             messages.OperationalHalt: b"\x4f",
             messages.QuoteUpdate: b"\x51",
+            messages.SecurityEvent: b'\x45',
+            messages.BidPriceLevelUpdate: b'\x38',
+            messages.AskPriceLevelUpdate: b'\x35'
         }
 
         self.decoder = messages.MessageDecoder(version=version)
