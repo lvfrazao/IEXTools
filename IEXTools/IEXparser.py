@@ -60,10 +60,15 @@ class Parser(object):
         deep: bool = False,
         version: float = 1.6,
     ) -> None:
-        self.file_path = file_path
+        if isinstance(file_path,str):
+            self.file_path = file_path
+            self.file = self._load(file_path)
+        else:
+            self.file=file_path
+            self.file_path=file_path.filename
+            
         self.tops = tops
         self.deep = deep
-        self.file = self._load(file_path)
         # IEX TP Header Structure
         # Many of these byte strings are hardcoded and may cause compatibility
         # issues with future or previous versions of TOPS, DEEP, or the EIX
@@ -75,11 +80,13 @@ class Parser(object):
             self.protocol_id = protcol_ids[version]
         elif deep:
             self.protocol_id = b"\x04\x80"
-            raise NotImplementedError("Parsing of DEEP files not implemented")
+            version=1.0
+#            raise NotImplementedError("Parsing of DEEP files not implemented")
         elif deep and tops:
             raise ValueError('"deep" and "tops" arguments cannot both be true')
         self.channel_id = b"\x01\x00\x00\x00"
-        self.session_id = self._get_session_id(file_path)
+        self.session_id = self._get_session_id(self.file)
+        self.file.seek(0)
         self.tp_header = (
             self.version
             + self.reserved
@@ -139,7 +146,7 @@ class Parser(object):
         else:
             return open(file_path, "rb")
 
-    def _get_session_id(self, file_path: str) -> bytes:
+    def _get_session_id(self, market_file: BinaryIO) -> bytes:
         """
         The session ID is unique every day. Simply denotes the day. We use this
         to build the IEX Transport Protocol header.
@@ -158,20 +165,20 @@ class Parser(object):
             iex_header_start = (
                 self.version + self.reserved + self.protocol_id + self.channel_id
             )
-            with self._load(file_path) as market_file:
-                found = False
-                i = 0
-                while not found:
-                    cur_chunk = market_file.read(1)
-                    if cur_chunk[0] == iex_header_start[i]:
-                        i += 1
-                        if i == len(iex_header_start):
-                            found = True
-                    else:
-                        i = 0
+            print(iex_header_start)
+            found = False
+            i = 0
+            while not found:
+                cur_chunk = market_file.read(1)
+                if cur_chunk[0] == iex_header_start[i]:
+                    i += 1
+                    if i == len(iex_header_start):
+                        found = True
+                else:
+                    i = 0
 
-                if found:
-                    return market_file.read(4)
+            if found:
+                return market_file.read(4)
         raise ProtocolException("Session ID could not be found in the supplied file")
 
     def read_next_line(self) -> bytes:
