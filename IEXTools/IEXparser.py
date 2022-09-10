@@ -58,7 +58,7 @@ class Parser(object):
         file_path: str,
         tops: bool = True,
         deep: bool = False,
-        tops_version: float = 1.6,
+        version: float = 1.6,
     ) -> None:
         self.file_path = file_path
         self.tops = tops
@@ -72,7 +72,7 @@ class Parser(object):
         self.reserved = b"\x00"
         if tops and not deep:
             protcol_ids = {1.5: b"\x02\x80", 1.6: b"\x03\x80"}
-            self.protocol_id = protcol_ids[tops_version]
+            self.protocol_id = protcol_ids[version]
         elif deep:
             self.protocol_id = b"\x04\x80"
             raise NotImplementedError("Parsing of DEEP files not implemented")
@@ -103,7 +103,7 @@ class Parser(object):
             messages.QuoteUpdate: b"\x51",
         }
 
-        self.decoder = messages.MessageDecoder(version=tops_version)
+        self.decoder = messages.MessageDecoder(version=version)
 
     def __repr__(self) -> str:
         return f'Parser("{self.file_path}", tops={self.tops}, deep={self.deep})'
